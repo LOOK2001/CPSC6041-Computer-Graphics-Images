@@ -20,7 +20,7 @@ unsigned char* data;
 int xres;
 int yres;
 int channels;
-image img;
+Image img;
 
 void read() {
 	readOIIOImage(filename, img);
