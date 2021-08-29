@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void readOIIOImage(const string filename, image& img)
+void readOIIOImage(const string filename, Image& img)
 {
 	int xres, yres, channels;
 	auto in = ImageInput::open(filename);

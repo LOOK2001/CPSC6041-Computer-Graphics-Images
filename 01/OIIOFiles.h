@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void readOIIOImage(const string fname, image& img);
-void writeOIIOImage(const string fname, image& img);
+void readOIIOImage(const string fname, Image& img);
+void writeOIIOImage(const string fname, Image& img);
 
 #endif
