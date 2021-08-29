@@ -19,7 +19,7 @@ OIIO_NAMESPACE_USING
 #define HEIGHT 600
 
 static int icolor = 0;
-string filename = "images/cube.ppm";
+string filename = "images/mario.png";
 unsigned char** pixmap;
 unsigned char* data;
 int xres;
@@ -49,15 +49,15 @@ void read() {
 	//	pixmap[y] = pixmap[y - 1] + xres * channels;
 	//}
 
-	if (!in->read_image(TypeDesc::UINT8, pixmap[0])) {
-		std::cerr << "Could not read pixels from" << filename << ", error = " << in->geterror() << "\n";
-	}
+	// if (!in->read_image(TypeDesc::UINT8, pixmap[0])) {
+	// 	std::cerr << "Could not read pixels from" << filename << ", error = " << in->geterror() << "\n";
+	// }
+	//
+	// in->close();
 
-	in->close();
-
-#if OIIO_VERSION < 10903
-	ImageInput::destroy(in);
-#endif
+// #if OIIO_VERSION < 10903
+// 	ImageInput::destroy(in);
+// #endif
 }
 
 void displayImages() {
@@ -67,7 +67,7 @@ void displayImages() {
 	// clear window to background color
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	img.show()
+	img.show();
 	//glDrawPixels(xres, yres, GL_RGBA, GL_UNSIGNED_BYTE, pixmap[0]);
 
 	// flush the OpenGL pipeline to the viewport
