@@ -20,9 +20,9 @@ unsigned char* data;
 int xres;
 int yres;
 int channels;
+image img;
 
 void read() {
-	image img;
 	readOIIOImage(filename, img);
 
 	auto in = ImageInput::open(filename);
