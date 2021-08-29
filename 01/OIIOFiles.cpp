@@ -33,6 +33,15 @@ void readOIIOImage(const string filename, image& img)
 
 	img.reset(xres, yres, channels);
 
+	long index = 0;
+	for (int i = 0; i < yres; i++) {
+		for (int j = 0; j < xres; j++) {
+			for (c = 0; c < channels; c++) {
+				img.value(i, j, c) = pixmap[index++];
+			}
+		}
+	}
+
 	in->close();
 #if OIIO_VERSION < 10903
 	ImageInput::destroy(in);
