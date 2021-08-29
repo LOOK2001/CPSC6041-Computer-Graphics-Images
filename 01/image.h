@@ -42,17 +42,33 @@ typedef struct _RGBA_PIXEL_STRUCT
 class image
 {
 public:
-  image(): xres(0), yres(0), nchannels(0){}
-  ~image(){}
+    image(): width(0), height(0), channels(0){}
+    ~image(){}
 
-  void read();
+    void reset(int w, int h, int c = 4)
+    {
+		width = w;
+		height = h;
+		channels = c;
+        pixmap = new unsigned char* [yres * channels];
+		data = new unsigned char[width * height * channels];
+
+		pixmap[0] = data;
+		for (int y = 1; y < yres; y++) {
+			pixmap[y] = pixmap[y - 1] + xres * channels;
+		}
+    }
+
+    const int Width() const { return width; }
+    const int Height() const { return height; }
+    const int Channels() const { return channels; }
 private:
-  string filename;
-  unsigned char** pixmap;
-  unsigned char* data;
-  int xres;
-  int yres;
-  int nchannels;
+    string filename;
+	unsigned char** pixmap;
+	unsigned char* data;
+    int width;
+    int height;
+    int channels;
 }
 
 #endif // IMAGE_H
