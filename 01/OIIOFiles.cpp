@@ -19,8 +19,8 @@ void readOIIOImage(const string filename, Image& img)
 	yres = spec.height;
 	channels = spec.nchannels;
 
-	unsigned char** pixmap = new unsigned char* [yres * channels];
-	unsigned char* data = new unsigned char[xres * yres * channels];
+	Pixel** pixmap = new Pixel* [yres * channels];
+	Pixel* data = new Pixel[xres * yres * channels];
 
 	pixmap[0] = data;
 	for (int y = 1; y < yres; y++) {
@@ -36,8 +36,8 @@ void readOIIOImage(const string filename, Image& img)
 	long index = 0;
 	for (int i = 0; i < yres; i++) {
 		for (int j = 0; j < xres; j++) {
-			for (c = 0; c < channels; c++) {
-				img.value(i, j, c) = pixmap[index++];
+			for (int c = 0; c < channels; c++) {
+				img.value(i, j, c) = pixmap[i][j][c];
 			}
 		}
 	}

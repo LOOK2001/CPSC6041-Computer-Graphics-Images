@@ -25,7 +25,7 @@ typedef struct RGBA_STRUCT
 	}
 	~RGBA_STRUCT() {}
 
-	const unsigned char& operator[] (const int index) { return rgba[index]; }
+	const unsigned char& operator[] (const int index) const { return rgba[index]; }
 	unsigned char& operator[] (const int index) { return rgba[index]; }
 
 	const unsigned char X() const { return rgba[0]; }
