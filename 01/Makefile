@@ -11,15 +11,17 @@ else
   endif
 endif
 
+INCLUDES = -I ./
+
 PROJECT		= imgview
 
-SOURCES = image.cpp imgview.cpp OIIOFiles.cpp
+SOURCES = imgview.cpp image.cpp OIIOFiles.cpp
 
-${PROJECT}:	${SOURCES:%.${C}=%.o}
-	${CC} ${CFLAGS} -o ${SOURCES:%.${C}=%.o} ${LDFLAGS} $@
+$(PROJECT):	$(SOURCES:%.$(C)=%.o)
+	$(CC) $(SOURCES:%.$(C)=%.o) $(INCLUDES) $(LDFLAGS) -o $@
 
-${SOURCES:%.$(C)=%.o}:	%.o: %.${C}
-	${CC} -o $@ ${CFLAGS} -c $<
+$(SOURCES:%.$(C)=%.o):	%.o: %.$(C)
+	$(CC) -o $@ -c $(CFLAGS) $<
 
 clean:
 	rm -f core.* *.o *~ ${PROJECT}

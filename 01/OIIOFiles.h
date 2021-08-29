@@ -1,4 +1,4 @@
-##ifndef __OIIOFILES_H__
+#ifndef __OIIOFILES_H__
 #define __OIIOFILES_H__
 
 #include "image.h"

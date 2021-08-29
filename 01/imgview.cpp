@@ -3,7 +3,7 @@
 
 #include <GL/glut.h>
 
-#include "image.h"
+//#include "image.h"
 
 using namespace std;
 OIIO_NAMESPACE_USING
