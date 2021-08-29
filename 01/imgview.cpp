@@ -3,7 +3,7 @@
 
 #include <GL/glut.h>
 
-#include <image.h>
+//#include "image.h"
 
 using namespace std;
 OIIO_NAMESPACE_USING
@@ -31,14 +31,14 @@ void read(){
   xres = spec.width;
   yres = spec.height;
   channels = spec.nchannels;
-  channels = 4;
+  std::cout << channels << endl;
 
   pixmap = new unsigned char*[yres * channels];
   data = new unsigned char[xres * yres * channels];
 
   pixmap[0] = data;
   for (int y = 1; y < yres; y ++){
-    pixmap[y * channels] = pixmap[(y - 1) * channels] + xres * channels;
+    pixmap[y] = pixmap[y - 1] + xres * channels;
   }
 
   if (!in->read_image(TypeDesc::UINT8, pixmap[0])){
@@ -64,7 +64,7 @@ void displayImages(){
   // clear window to background color
   glClear(GL_COLOR_BUFFER_BIT);
 
-  glDrawPixels(xres, yres, GL_RGB, GL_UNSIGNED_BYTE, pixmap[0]);
+  glDrawPixels(xres, yres, GL_RGBA, GL_UNSIGNED_BYTE, pixmap[0]);
 
   // flush the OpenGL pipeline to the viewport
   glFlush();
