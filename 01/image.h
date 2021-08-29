@@ -28,10 +28,10 @@ typedef struct RGBA_STRUCT
 	const unsigned char& operator[] (const int index) { return rgba[index]; }
 	unsigned char& operator[] (const int index) { return rgba[index]; }
 
-	const double X() const { return rgba[0]; }
-	const double Y() const { return rgba[1]; }
-	const double Z() const { return rgba[2]; }
-	const double W() const { return rgba[3]; }
+	const unsigned char X() const { return rgba[0]; }
+	const unsigned char Y() const { return rgba[1]; }
+	const unsigned char Z() const { return rgba[2]; }
+	const unsigned char W() const { return rgba[3]; }
 
 private:
 	unsigned char rgba[4];
@@ -58,9 +58,9 @@ public:
 		}
 	}
 
-	const float& value(int x, int y, int c) const {
-		return pixmap[x][y][c];
-	}
+	const unsigned char& value(int x, int y, int c) const { return pixmap[x][y][c]; }
+	unsigned char& value(int x, int y, int c) { return pixmap[x][y][c]; }
+
 
 	const int Width() const { return width; }
 	const int Height() const { return height; }

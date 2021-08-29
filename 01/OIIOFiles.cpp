@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void readOIIOImage(const string filename, image& img)
+void readOIIOImage(const string filename, Image& img)
 {
 	int xres, yres, channels;
 	auto in = ImageInput::open(filename);
@@ -50,7 +50,7 @@ void readOIIOImage(const string filename, image& img)
 	delete[] data;
 }
 
-void writeOIIOImage(const string fname, image& img)
+void writeOIIOImage(const string fname, Image& img)
 {
 
 }
