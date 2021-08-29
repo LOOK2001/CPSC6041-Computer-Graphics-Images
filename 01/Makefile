@@ -13,11 +13,13 @@ endif
 
 PROJECT		= imgview
 
-${PROJECT}:	${PROJECT}.o
-	${CC} ${CFLAGS} -o ${PROJECT} ${PROJECT}.o ${LDFLAGS}
+SOURCES = image.cpp imgview.cpp OIIOFiles.cpp
 
-${PROJECT}.o:	${PROJECT}.${C}
-	${CC} ${CFLAGS} -c ${PROJECT}.${C}
+${PROJECT}:	${SOURCES:%.${C}=%.o}
+	${CC} ${CFLAGS} -o ${SOURCES:%.${C}=%.o} ${LDFLAGS} $@
+
+${SOURCES:%.$(C)=%.o}:	%.o: %.${C}
+	${CC} -o $@ ${CFLAGS} -c $<
 
 clean:
 	rm -f core.* *.o *~ ${PROJECT}

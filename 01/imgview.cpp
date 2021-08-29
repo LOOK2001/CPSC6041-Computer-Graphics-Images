@@ -3,7 +3,7 @@
 
 #include <GL/glut.h>
 
-//#include "image.h"
+#include "image.h"
 
 using namespace std;
 OIIO_NAMESPACE_USING
@@ -31,7 +31,6 @@ void read(){
   xres = spec.width;
   yres = spec.height;
   channels = spec.nchannels;
-  std::cout << channels << endl;
 
   pixmap = new unsigned char*[yres * channels];
   data = new unsigned char[xres * yres * channels];
@@ -43,11 +42,6 @@ void read(){
 
   if (!in->read_image(TypeDesc::UINT8, pixmap[0])){
     std::cerr << "Could not read pixels from" << filename << ", error = " << in->geterror() << "\n";
-    in->close();
-#if OIIO_VERSION < 10903
-  ImageInput::destroy(in);
-#endif
-    return;
   }
 
   in->close();
