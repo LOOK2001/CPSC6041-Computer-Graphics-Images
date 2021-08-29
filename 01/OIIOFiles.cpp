@@ -50,7 +50,7 @@ void readOIIOImage(const string filename, Image& img)
 	delete[] data;
 }
 
-void writeOIIOImage(const string fname, image& img)
+void writeOIIOImage(const string fname, Image& img)
 {
 
 }
