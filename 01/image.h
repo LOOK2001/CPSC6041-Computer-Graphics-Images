@@ -61,10 +61,12 @@ public:
 	const unsigned char& value(int x, int y, int c) const { return pixmap[x][y][c]; }
 	unsigned char& value(int x, int y, int c) { return pixmap[x][y][c]; }
 
+	void show();
 
 	const int Width() const { return width; }
 	const int Height() const { return height; }
 	const int Channels() const { return channels; }
+
 private:
 	string filename;
 	Pixel** pixmap;

@@ -1,7 +1,12 @@
 #include <OpenImageIO/imageio.h>
 #include <iostream>
 
-#include <GL/glut.h>
+#ifdef __APPLE__
+#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#  include <GLUT/glut.h>
+#else
+#  include <GL/glut.h>
+#endif
 
 #include "image.h"
 #include "OIIOFiles.h"
@@ -25,24 +30,24 @@ Image img;
 void read() {
 	readOIIOImage(filename, img);
 
-	auto in = ImageInput::open(filename);
-	if (!in) {
-		cerr << "Could not open the image" << filename << ", error = " << geterror() << endl;
-		return;
-	}
+	//auto in = ImageInput::open(filename);
+	//if (!in) {
+	//	cerr << "Could not open the image" << filename << ", error = " << geterror() << endl;
+	//	return;
+	//}
 
-	const ImageSpec& spec = in->spec();
-	xres = spec.width;
-	yres = spec.height;
-	channels = spec.nchannels;
+	//const ImageSpec& spec = in->spec();
+	//xres = spec.width;
+	//yres = spec.height;
+	//channels = spec.nchannels;
 
-	pixmap = new unsigned char* [yres * channels];
-	data = new unsigned char[xres * yres * channels];
+	//pixmap = new unsigned char* [yres * channels];
+	//data = new unsigned char[xres * yres * channels];
 
-	pixmap[0] = data;
-	for (int y = 1; y < yres; y++) {
-		pixmap[y] = pixmap[y - 1] + xres * channels;
-	}
+	//pixmap[0] = data;
+	//for (int y = 1; y < yres; y++) {
+	//	pixmap[y] = pixmap[y - 1] + xres * channels;
+	//}
 
 	if (!in->read_image(TypeDesc::UINT8, pixmap[0])) {
 		std::cerr << "Could not read pixels from" << filename << ", error = " << in->geterror() << "\n";
@@ -62,7 +67,8 @@ void displayImages() {
 	// clear window to background color
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glDrawPixels(xres, yres, GL_RGBA, GL_UNSIGNED_BYTE, pixmap[0]);
+	img.show()
+	//glDrawPixels(xres, yres, GL_RGBA, GL_UNSIGNED_BYTE, pixmap[0]);
 
 	// flush the OpenGL pipeline to the viewport
 	glFlush();

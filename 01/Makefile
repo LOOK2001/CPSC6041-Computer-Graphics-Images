@@ -13,7 +13,7 @@ endif
 
 INCLUDES = -I ./
 
-PROJECT		= imgview
+PROJECT = imgview
 
 SOURCES = imgview.cpp image.cpp OIIOFiles.cpp
 
