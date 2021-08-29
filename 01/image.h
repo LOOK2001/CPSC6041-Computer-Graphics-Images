@@ -14,44 +14,43 @@
 using namespace std;
 OIIO_NAMESPACE_USING
 
-// enum
-// {
-//     _DISPLAY_ORIGINAL = 0,  //display the original image
-//     _DISPLAY_REDCHANNEL,    //display red channel of image
-//     _DISPLAY_GREENCHANNEL,  //display green channel of image
-//     _DISPLAY_BLUECHANNEL,   //display blue channel of image
-// };
-//
-// /*struct to store image pixel to display*/
-// typedef struct _RGBA_PIXEL_STRUCT
-// {
-//     unsigned char r;           //the value of red channel
-//     unsigned char g;         //the value of green channel
-//     unsigned char b;          //the value of blue channel
-//     unsigned char a;         //the value of alpha channel
-//     _RGB_PIXEL_STRUCT()
-//     {
-//         uchRed=0;
-//         uchGreen=0;
-//         uchBlue=0;
-//         uchAlpha=255;               //the alpha channel is valued as 255 when the struct is created
-//     }
-// }pixel;
+
+/*struct to store image pixel to display*/
+typedef struct RGBA_STRUCT
+{
+	RGBA_STRUCT()
+	{
+		rgba[0] =rgba[1] = rgba[2] = 0;
+		rgba[3] = 255;		//the alpha channel is valued as 255 when the struct is created
+	}
+	~RGBA_STRUCT() {}
+
+	const unsigned char& operator[] (const int index) { return rgba[index]; }
+	unsigned char& operator[] (const int index) { return rgba[index]; }
+
+	const double X() const { return rgba[0]; }
+	const double Y() const { return rgba[1]; }
+	const double Z() const { return rgba[2]; }
+	const double W() const { return rgba[3]; }
+
+private:
+	unsigned char rgba[4];
+}Pixel;
 
 
-class image
+class Image
 {
 public:
-	image() : width(0), height(0), channels(0) {}
-	~image() {}
+	Image() : width(0), height(0), channels(0) {}
+	~Image() {}
 
 	void reset(int w, int h, int c = 4)
 	{
 		width = w;
 		height = h;
 		channels = c;
-		pixmap = new unsigned char* [height * channels];
-		data = new unsigned char[width * height * channels];
+		pixmap = new Pixel* [height * channels];
+		data = new Pixel[width * height * channels];
 
 		pixmap[0] = data;
 		for (int y = 1; y < height; y++) {
@@ -68,8 +67,8 @@ public:
 	const int Channels() const { return channels; }
 private:
 	string filename;
-	unsigned char** pixmap;
-	unsigned char* data;
+	Pixel** pixmap;
+	Pixel* data;
 	int width;
 	int height;
 	int channels;
