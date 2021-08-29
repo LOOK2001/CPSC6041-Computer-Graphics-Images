@@ -42,33 +42,33 @@ OIIO_NAMESPACE_USING
 class image
 {
 public:
-    image(): width(0), height(0), channels(0){}
-    ~image(){}
+	image() : width(0), height(0), channels(0) {}
+	~image() {}
 
-    void reset(int w, int h, int c = 4)
-    {
-        width = w;
-        height = h;
-        channels = c;
-        pixmap = new unsigned char* [height * channels];
-        data = new unsigned char[width * height * channels];
+	void reset(int w, int h, int c = 4)
+	{
+		width = w;
+		height = h;
+		channels = c;
+		pixmap = new unsigned char* [height * channels];
+		data = new unsigned char[width * height * channels];
 
-        pixmap[0] = data;
-    		for (int y = 1; y < height; y++) {
-    			pixmap[y] = pixmap[y - 1] + width * channels;
-    		}
-    }
+		pixmap[0] = data;
+		for (int y = 1; y < height; y++) {
+			pixmap[y] = pixmap[y - 1] + width * channels;
+		}
+	}
 
-    const int Width() const { return width; }
-    const int Height() const { return height; }
-    const int Channels() const { return channels; }
+	const int Width() const { return width; }
+	const int Height() const { return height; }
+	const int Channels() const { return channels; }
 private:
-    string filename;
-    unsigned char** pixmap;
-    unsigned char* data;
-    int width;
-    int height;
-    int channels;
+	string filename;
+	unsigned char** pixmap;
+	unsigned char* data;
+	int width;
+	int height;
+	int channels;
 };
 
 #endif // IMAGE_H
