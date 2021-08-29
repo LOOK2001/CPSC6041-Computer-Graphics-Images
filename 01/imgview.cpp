@@ -30,24 +30,24 @@ Image img;
 void read() {
 	readOIIOImage(filename, img);
 
-	//auto in = ImageInput::open(filename);
-	//if (!in) {
-	//	cerr << "Could not open the image" << filename << ", error = " << geterror() << endl;
-	//	return;
-	//}
+	auto in = ImageInput::open(filename);
+	if (!in) {
+		cerr << "Could not open the image" << filename << ", error = " << geterror() << endl;
+		return;
+	}
 
-	//const ImageSpec& spec = in->spec();
-	//xres = spec.width;
-	//yres = spec.height;
-	//channels = spec.nchannels;
+	const ImageSpec& spec = in->spec();
+	xres = spec.width;
+	yres = spec.height;
+	channels = spec.nchannels;
 
-	//pixmap = new unsigned char* [yres * channels];
-	//data = new unsigned char[xres * yres * channels];
+	pixmap = new unsigned char* [yres * channels];
+	data = new unsigned char[xres * yres * channels];
 
-	//pixmap[0] = data;
-	//for (int y = 1; y < yres; y++) {
-	//	pixmap[y] = pixmap[y - 1] + xres * channels;
-	//}
+	pixmap[0] = data;
+	for (int y = 1; y < yres; y++) {
+		pixmap[y] = pixmap[y - 1] + xres * channels;
+	}
 
 	if (!in->read_image(TypeDesc::UINT8, pixmap[0])) {
 		std::cerr << "Could not read pixels from" << filename << ", error = " << in->geterror() << "\n";

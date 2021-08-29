@@ -20,7 +20,7 @@ typedef struct RGBA_STRUCT
 {
 	RGBA_STRUCT()
 	{
-		rgba[0] =rgba[1] = rgba[2] = 0;
+		rgba[0] = rgba[1] = rgba[2] = 0;
 		rgba[3] = 255;		//the alpha channel is valued as 255 when the struct is created
 	}
 	~RGBA_STRUCT() {}
