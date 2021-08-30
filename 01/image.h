@@ -35,8 +35,8 @@ public:
 		}
 	}
 
-	// const unsigned char& value(int x, int y, int c) const { return pixmap[x][y][c]; }
-	// unsigned char& value(int x, int y, int c) { return pixmap[x][y][c]; }
+	const unsigned char& value(int x, int y, int c) const { return pixmap[y][x * channels + c]; }
+	unsigned char& value(int x, int y, int c) { return pixmap[y][x * channels + c]; }
 
 	void show() { glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixmap[0]); }
 
@@ -45,10 +45,9 @@ public:
 	const int Height() const { return height; }
 	const int Channels() const { return channels; }
 
-	unsigned char** pixmap;
-
 private:
 	string filename;
+	unsigned char** pixmap;
 	unsigned char* data;
 	int width;
 	int height;

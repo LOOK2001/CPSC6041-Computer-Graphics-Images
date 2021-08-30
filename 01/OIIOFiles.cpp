@@ -35,9 +35,11 @@ void readOIIOImage(const string filename, Image& img)
 
 	for (int i = 0; i < xres; i++) {
 		for (int j = 0; j < yres; j++) {
-			img.pixmap[j][i * channels + 3] = 255;
+			img.value(i, j, 3) = 255;
+			//img.pixmap[j][i * channels + 3] = 255;
 			for (int k = 0; k < channels; k++) {
-				img.pixmap[yres - j - 1][i * channels + k] = pixmap[j][i * channels + k];
+				img.value(i * channels, yres - j - 1, k) = pixmap[j][i * channels + k];
+				//img.pixmap[yres - j - 1][i * channels + k] = pixmap[j][i * channels + k];
 			}
 		}
 	}
