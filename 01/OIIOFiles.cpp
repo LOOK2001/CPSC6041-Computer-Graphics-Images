@@ -31,6 +31,8 @@ void readOIIOImage(const string filename, Image& img)
 		std::cerr << "Could not read pixels from" << filename << ", error = " << in->geterror() << "\n";
 	}
 
+	cout << channels << endl;
+
 	img.reset(xres, yres);
 
 	for (int i = 0; i < xres; i++) {
@@ -38,7 +40,7 @@ void readOIIOImage(const string filename, Image& img)
 			img.value(i, j, 3) = 255;
 			//img.pixmap[j][i * channels + 3] = 255;
 			for (int k = 0; k < channels; k++) {
-				img.value(i * channels, yres - j - 1, k) = pixmap[j][i * channels + k];
+				img.value(i, yres - j - 1, k) = pixmap[j][i * channels + k];
 				//img.pixmap[yres - j - 1][i * channels + k] = pixmap[j][i * channels + k];
 			}
 		}
