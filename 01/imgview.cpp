@@ -18,7 +18,7 @@ OIIO_NAMESPACE_USING
 #define WIDTH 600
 #define HEIGHT 600
 
-string filename = "images/mario.png";
+string filename = "images/parrot_greyscale.png";
 Image img;
 
 void read() {
