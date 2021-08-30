@@ -14,32 +14,6 @@
 using namespace std;
 OIIO_NAMESPACE_USING
 
-
-/*struct to store image pixel to display*/
-typedef struct RGBA_STRUCT
-{
-	RGBA_STRUCT()
-	{
-		rgba[0] = 0;
-		rgba[1] = 0;
-		rgba[2] = 0;
-		rgba[3] = 255;		//the alpha channel is valued as 255 when the struct is created
-	}
-	~RGBA_STRUCT() {}
-
-	const unsigned char& operator[] (const int index) const { return rgba[index]; }
-	unsigned char& operator[] (const int index) { return rgba[index]; }
-
-	const unsigned char X() const { return rgba[0]; }
-	const unsigned char Y() const { return rgba[1]; }
-	const unsigned char Z() const { return rgba[2]; }
-	const unsigned char W() const { return rgba[3]; }
-
-private:
-	unsigned char* rgba[4];
-}Pixel;
-
-
 class Image
 {
 public:
@@ -51,8 +25,9 @@ public:
 		width = w;
 		height = h;
 		channels = c;
-		pixmap = new Pixel * [height];
-		data = new Pixel[width * height];
+
+		pixmap = new unsigned char* [height * channels];
+		data = new unsigned char[width * height * channels];
 
 		pixmap[0] = data;
 		for (int y = 1; y < height; y++) {
@@ -60,19 +35,21 @@ public:
 		}
 	}
 
-	const unsigned char& value(int x, int y, int c) const { return pixmap[x][y][c]; }
-	unsigned char& value(int x, int y, int c) { return pixmap[x][y][c]; }
+	// const unsigned char& value(int x, int y, int c) const { return pixmap[x][y][c]; }
+	// unsigned char& value(int x, int y, int c) { return pixmap[x][y][c]; }
 
-	void show();
+	void show() { glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixmap[0]); }
 
+	unsigned char** pixels() const {return pixmap;}
 	const int Width() const { return width; }
 	const int Height() const { return height; }
 	const int Channels() const { return channels; }
 
+	unsigned char** pixmap;
+
 private:
 	string filename;
-	Pixel** pixmap;
-	Pixel* data;
+	unsigned char* data;
 	int width;
 	int height;
 	int channels;

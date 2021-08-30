@@ -19,11 +19,11 @@ void readOIIOImage(const string filename, Image& img)
 	yres = spec.height;
 	channels = spec.nchannels;
 
-	Pixel** pixmap = new Pixel * [yres];
-	Pixel* data = new Pixel[xres * yres];
+	unsigned char** pixmap = new unsigned char* [yres * channels];
+	unsigned char* data = new unsigned char[xres * yres * channels];
 
 	pixmap[0] = data;
-	for (int y = 1; y < yres; y++) {
+	for (int y = 1; y < yres; y++){
 		pixmap[y] = pixmap[y - 1] + xres * channels;
 	}
 
@@ -31,13 +31,13 @@ void readOIIOImage(const string filename, Image& img)
 		std::cerr << "Could not read pixels from" << filename << ", error = " << in->geterror() << "\n";
 	}
 
-	img.reset(xres, yres, channels);
+	img.reset(xres, yres);
 
-	for (int i = 0; i < yres; i++) {
-		for (int j = 0; j < xres; j++) {
-			img.value(i, j, 3) = 255;
-			for (int c = 0; c < channels; c++) {
-				img.value(i, j, c) = pixmap[i][j][c];
+	for (int i = 0; i < xres; i++) {
+		for (int j = 0; j < yres; j++) {
+			img.pixmap[j][i * channels + 3] = 255;
+			for (int k = 0; k < channels; k++) {
+				img.pixmap[yres - j - 1][i * channels + k] = pixmap[j][i * channels + k];
 			}
 		}
 	}
