@@ -20,7 +20,9 @@ typedef struct RGBA_STRUCT
 {
 	RGBA_STRUCT()
 	{
-		rgba[0] = rgba[1] = rgba[2] = 0;
+		rgba[0] = 0;
+		rgba[1] = 0;
+		rgba[2] = 0;
 		rgba[3] = 255;		//the alpha channel is valued as 255 when the struct is created
 	}
 	~RGBA_STRUCT() {}
@@ -34,7 +36,7 @@ typedef struct RGBA_STRUCT
 	const unsigned char W() const { return rgba[3]; }
 
 private:
-	unsigned char rgba[4];
+	unsigned char* rgba[4];
 }Pixel;
 
 
@@ -49,8 +51,8 @@ public:
 		width = w;
 		height = h;
 		channels = c;
-		pixmap = new Pixel* [height * channels];
-		data = new Pixel[width * height * channels];
+		pixmap = new Pixel * [height];
+		data = new Pixel[width * height];
 
 		pixmap[0] = data;
 		for (int y = 1; y < height; y++) {

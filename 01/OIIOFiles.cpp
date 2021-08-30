@@ -19,7 +19,7 @@ void readOIIOImage(const string filename, Image& img)
 	yres = spec.height;
 	channels = spec.nchannels;
 
-	Pixel** pixmap = new Pixel* [yres];
+	Pixel** pixmap = new Pixel * [yres];
 	Pixel* data = new Pixel[xres * yres];
 
 	pixmap[0] = data;
@@ -33,7 +33,6 @@ void readOIIOImage(const string filename, Image& img)
 
 	img.reset(xres, yres, channels);
 
-	long index = 0;
 	for (int i = 0; i < yres; i++) {
 		for (int j = 0; j < xres; j++) {
 			img.value(i, j, 3) = 255;
