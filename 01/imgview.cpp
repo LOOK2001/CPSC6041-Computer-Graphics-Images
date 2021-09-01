@@ -18,7 +18,8 @@ OIIO_NAMESPACE_USING
 #define WIDTH 600
 #define HEIGHT 600
 
-string filename = "images/parrot_greyscale.png";
+string filename = "images/cube.ppm";
+string filenames[4] = {"images/cube.ppm", "images/teapot.jpg", "images/mario.png", "images/parrot_greyscale.png"};
 Image img;
 
 void read() {
@@ -44,6 +45,27 @@ void handleKey(unsigned char key, int x, int y) {
 	case 'Q':
 	case 27:
 		exit(0);
+
+	case '1':
+		filename = filenames[0];
+		readOIIOImage(filename, img);
+		displayImages();
+		break;
+	case '2':
+		filename = filenames[1];
+		readOIIOImage(filename, img);
+		displayImages();
+		break;
+	case '3':
+		filename = filenames[2];
+		readOIIOImage(filename, img);
+		displayImages();
+		break;
+	case '4':
+		filename = filenames[3];
+		readOIIOImage(filename, img);
+		displayImages();
+		break;
 
 	defalut:
 		return;
