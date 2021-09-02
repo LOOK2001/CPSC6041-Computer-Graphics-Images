@@ -25,7 +25,7 @@ Image img;
 
 void displayImages() {
 	// specify window clear (background) color to be opaque white
-	glClearColor(1, 1, 1, 1);
+	glClearColor(0, 0, 0, 1);
 
 	// clear window to background color
 	glClear(GL_COLOR_BUFFER_BIT);
