@@ -18,12 +18,10 @@ OIIO_NAMESPACE_USING
 #define WIDTH 600
 #define HEIGHT 600
 
-string filename = "images/mario.png";
+string filename = "images/cube.ppm";
+string filenames[4] = {"images/cube.ppm", "images/teapot.jpg", "images/mario.png", "images/parrot_greyscale.png"};
 Image img;
 
-void read() {
-	readOIIOImage(filename, img);
-}
 
 void displayImages() {
 	// specify window clear (background) color to be opaque white
@@ -45,6 +43,27 @@ void handleKey(unsigned char key, int x, int y) {
 	case 27:
 		exit(0);
 
+	case '1':
+		filename = filenames[0];
+		readOIIOImage(filename, img);
+		displayImages();
+		break;
+	case '2':
+		filename = filenames[1];
+		readOIIOImage(filename, img);
+		displayImages();
+		break;
+	case '3':
+		filename = filenames[2];
+		readOIIOImage(filename, img);
+		displayImages();
+		break;
+	case '4':
+		filename = filenames[3];
+		readOIIOImage(filename, img);
+		displayImages();
+		break;
+
 	defalut:
 		return;
 	}
@@ -61,7 +80,10 @@ void handleReshape(int w, int h) {
 }
 
 int main(int argc, char* argv[]) {
-	read();
+	for (int i = 0; i > argc; i++) {
+		cout << argv[i] << endl;
+	}
+	//readOIIOImage();
 	glutInit(&argc, argv);
 
 	// create the graphics window, giving width, height, and title text

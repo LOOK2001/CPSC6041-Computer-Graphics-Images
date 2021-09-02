@@ -31,18 +31,14 @@ void readOIIOImage(const string filename, Image& img)
 		std::cerr << "Could not read pixels from" << filename << ", error = " << in->geterror() << "\n";
 	}
 
+	cout << channels << endl;
+
 	img.reset(xres, yres);
 
-	for (int i = 0; i < xres; i++) {
-		for (int j = 0; j < yres; j++) {
-			img.value(i, j, 3) = 255;
-			//img.pixmap[j][i * channels + 3] = 255;
-			for (int k = 0; k < channels; k++) {
-				img.value(i, yres - j - 1, k) = pixmap[j][i * channels + k];
-				//img.pixmap[yres - j - 1][i * channels + k] = pixmap[j][i * channels + k];
-			}
-		}
-	}
+	if (channels == 1)
+		loadSingleChannel(img, pixmap);
+	else
+		loadMultiChannels(img, pixmap, channels);
 
 	in->close();
 #if OIIO_VERSION < 10903
@@ -59,27 +55,29 @@ void writeOIIOImage(const string fname, Image& img)
 
 void loadSingleChannel(Image& img, unsigned char** src)
 {
-	int channels = 4;
+	int xres = img.Width();
+	int yres = img.Height();
 
 	for (int i = 0; i < xres; i++) {
 		for (int j = 0; j < yres; j++) {
 			img.value(i, j, 3) = 255;
-			img.value(i, j, 1) = pixmap[j][i * channels + k];
-			img.value(i, j, 2) = pixmap[j][i * channels + k];
-			img.value(i, j, 3) = pixmap[j][i * channels + k];
+			img.value(i, j, 0) = src[j][i];
+			img.value(i, j, 1) = src[j][i];
+			img.value(i, j, 2) = src[j][i];
 		}
 	}
 }
 
-void loadMultiChannels(Image& img, unsigned char** src)
+void loadMultiChannels(Image& img, unsigned char** src, int channels)
 {
-	int channels = 4;
+	int xres = img.Width();
+	int yres = img.Height();
 
 	for (int i = 0; i < xres; i++) {
 		for (int j = 0; j < yres; j++) {
 			img.value(i, j, 3) = 255;
 			for (int k = 0; k < channels; k++) {
-				img.value(i, j, k) = pixmap[j][i * channels + k];
+				img.value(i, j, k) = src[j][i * channels + k];
 			}
 		}
 	}

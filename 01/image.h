@@ -18,7 +18,10 @@ class Image
 {
 public:
 	Image() : width(0), height(0), channels(0) {}
-	~Image() {}
+	~Image() {
+		delete[] data;
+		delete[] pixmap;
+	}
 
 	void reset(int w, int h, int c = 4)
 	{
@@ -35,8 +38,8 @@ public:
 		}
 	}
 
-	const unsigned char& value(int x, int y, int c) const { return pixmap[yres - j - 1][x * channels + c]; }
-	unsigned char& value(int x, int y, int c) { return pixmap[yres - j - 1][x * channels + c]; }
+	const unsigned char& value(int x, int y, int c) const { return pixmap[height - y - 1][x * channels + c]; }
+	unsigned char& value(int x, int y, int c) { return pixmap[height - y - 1][x * channels + c]; }
 
 	void show() { glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixmap[0]); }
 
