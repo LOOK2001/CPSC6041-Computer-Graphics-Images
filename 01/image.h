@@ -14,34 +14,29 @@
 using namespace std;
 OIIO_NAMESPACE_USING
 
+
+enum ColorMode { r, g, b, rgb, rgba };
+
+
 class Image
 {
 public:
-	Image() : width(0), height(0), channels(0) {}
+	Image() : width(0), height(0), channels(0), displayMode(ColorMode::rgba) {}
 	~Image() {
 		delete[] data;
 		delete[] pixmap;
 	}
 
-	void reset(int w, int h, int c = 4)
-	{
-		width = w;
-		height = h;
-		channels = c;
+	void reset(int w, int h, int c = 4);
 
-		pixmap = new unsigned char* [height * channels];
-		data = new unsigned char[width * height * channels];
+	//const unsigned char& value(int x, int y, int c) const { return pixmap[height - y - 1][x * channels + c]; }
+	//unsigned char& value(int x, int y, int c) { return pixmap[height - y - 1][x * channels + c]; }
+	const unsigned char& value(int x, int y, int c) const { return pixmap[y][x * channels + c]; }
+	unsigned char& value(int x, int y, int c) { return pixmap[y][x * channels + c]; }
 
-		pixmap[0] = data;
-		for (int y = 1; y < height; y++) {
-			pixmap[y] = pixmap[y - 1] + width * channels;
-		}
-	}
+	void show();
 
-	const unsigned char& value(int x, int y, int c) const { return pixmap[height - y - 1][x * channels + c]; }
-	unsigned char& value(int x, int y, int c) { return pixmap[height - y - 1][x * channels + c]; }
-
-	void show() { glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixmap[0]); }
+	void switchChannel(ColorMode _showChannel);
 
 	unsigned char** pixels() const {return pixmap;}
 	const int Width() const { return width; }
@@ -52,9 +47,13 @@ private:
 	string filename;
 	unsigned char** pixmap;
 	unsigned char* data;
+	unsigned char** singleChannelPixmap;
+	unsigned char* singleChannelData;
 	int width;
 	int height;
 	int channels;
+	ColorMode displayMode;
+
 };
 
 #endif // IMAGE_H

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void readOIIOImage(const string filename, Image& img)
+void readOIIOImage(const string filename, Image* img)
 {
 	int xres, yres, channels;
 	auto in = ImageInput::open(filename);
@@ -31,14 +31,14 @@ void readOIIOImage(const string filename, Image& img)
 		std::cerr << "Could not read pixels from" << filename << ", error = " << in->geterror() << "\n";
 	}
 
-	cout << channels << endl;
-
-	img.reset(xres, yres);
+	img->reset(xres, yres);
 
 	if (channels == 1)
 		loadSingleChannel(img, pixmap);
 	else
 		loadMultiChannels(img, pixmap, channels);
+
+	ImageOperator::flipVertical(img);
 
 	in->close();
 #if OIIO_VERSION < 10903
@@ -48,36 +48,79 @@ void readOIIOImage(const string filename, Image& img)
 	delete[] data;
 }
 
-void writeOIIOImage(const string fname, Image& img)
+void writeOIIOImage(const string outfilename, Image* img)
 {
+	int w = img->Width();
+	int h = img->Height();
 
+	unsigned char** pixmap = img->pixels();
+
+	auto outfile = ImageOutput::create(outfilename);
+
+	if (!outfile){
+		cerr << "Could not create output image for " << outfilename << ", error = " << geterror() << endl;
+		return;
+	}
+
+	// Open a file for writing the image.
+	ImageSpec spec(w, h, 4, TypeDesc::UINT8);
+	if(!outfile->open(outfilename, spec)){
+		cerr << "Could not open " << outfilename << ", error = " << geterror() << endl;
+		outfile->close();
+		return;
+	}
+
+	// write the image to the file. All channel values in the pixmap are taken to be
+	// unsigned chars
+	// first upside down
+	ImageOperator::flipVertical(img);
+	if(!outfile->write_image(TypeDesc::UINT8, pixmap[0])){
+		cerr << "Could not write image to " << outfilename << ", error = " << geterror() << endl;
+		outfile->close();
+		ImageOperator::flipVertical(img);
+		return;
+	}
+	else
+	{
+		cout << "Image is stored" << endl;
+		ImageOperator::flipVertical(img);
+	}
+
+	// close the image file after the image is written
+	if(!outfile->close()){
+		cerr << "Could not close " << outfilename << ", error = " << geterror() << endl;
+		outfile->close();
+		return;
+	}
+
+	outfile->close();
 }
 
-void loadSingleChannel(Image& img, unsigned char** src)
+void loadSingleChannel(Image* img, unsigned char** src)
 {
-	int xres = img.Width();
-	int yres = img.Height();
+	int xres = img->Width();
+	int yres = img->Height();
 
 	for (int i = 0; i < xres; i++) {
 		for (int j = 0; j < yres; j++) {
-			img.value(i, j, 3) = 255;
-			img.value(i, j, 0) = src[j][i];
-			img.value(i, j, 1) = src[j][i];
-			img.value(i, j, 2) = src[j][i];
+			img->value(i, j, 3) = 255;
+			img->value(i, j, 0) = src[j][i];
+			img->value(i, j, 1) = src[j][i];
+			img->value(i, j, 2) = src[j][i];
 		}
 	}
 }
 
-void loadMultiChannels(Image& img, unsigned char** src, int channels)
+void loadMultiChannels(Image* img, unsigned char** src, int channels)
 {
-	int xres = img.Width();
-	int yres = img.Height();
+	int xres = img->Width();
+	int yres = img->Height();
 
 	for (int i = 0; i < xres; i++) {
 		for (int j = 0; j < yres; j++) {
-			img.value(i, j, 3) = 255;
+			img->value(i, j, 3) = 255;
 			for (int k = 0; k < channels; k++) {
-				img.value(i, j, k) = src[j][i * channels + k];
+				img->value(i, j, k) = src[j][i * channels + k];
 			}
 		}
 	}

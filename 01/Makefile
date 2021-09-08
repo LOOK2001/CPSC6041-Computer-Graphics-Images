@@ -15,7 +15,7 @@ INCLUDES = -I ./
 
 PROJECT = imgview
 
-SOURCES = imgview.cpp image.cpp OIIOFiles.cpp
+SOURCES = imgview.cpp image.cpp OIIOFiles.cpp imageOperator.cpp
 
 $(PROJECT):	$(SOURCES:%.$(C)=%.o)
 	$(CC) $(SOURCES:%.$(C)=%.o) $(INCLUDES) $(LDFLAGS) -o $@
