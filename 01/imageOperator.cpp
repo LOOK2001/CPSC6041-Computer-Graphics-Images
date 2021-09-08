@@ -51,7 +51,7 @@ void ImageOperator::invertColor(Image* img)
             for (int k = 0; k < channels; k ++)
             {
                 unsigned char color = img->value(i, j, k);
-                img->value(i, j, k) = 1 - color;
+                img->value(i, j, k) = 255 - color;
             }
         }
     }

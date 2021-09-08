@@ -1,3 +1,13 @@
+//
+//	 Image class that encapsulate some basic function and memeber of image
+//
+//	 Contain with, height, channel, pixel data of image
+// 	 Set and get those value
+//
+//   CPSC 4040/6040            Xicheng WAng
+//
+//
+
 #ifndef IMAGE_H
 #define IMAGE_H
 
@@ -14,31 +24,37 @@
 using namespace std;
 OIIO_NAMESPACE_USING
 
-
+// enum for color
 enum ColorMode { r, g, b, rgb, rgba };
 
 
 class Image
 {
 public:
-	Image() : width(0), height(0), channels(0), displayMode(ColorMode::rgba) {}
+	Image() : width(0), height(0), channels(0), displayMode(ColorMode::rgba),
+	 			data(nullptr), pixmap(nullptr){}
 	~Image() {
-		delete[] data;
-		delete[] pixmap;
+		if (data)
+			delete[] data;
+		if (pixmap)
+			delete[] pixmap;
 	}
 
+	// allocate memory for pixel data with width, height and channel
 	void reset(int w, int h, int c = 4);
 
-	//const unsigned char& value(int x, int y, int c) const { return pixmap[height - y - 1][x * channels + c]; }
-	//unsigned char& value(int x, int y, int c) { return pixmap[height - y - 1][x * channels + c]; }
+	// get and set pixel value
 	const unsigned char& value(int x, int y, int c) const { return pixmap[y][x * channels + c]; }
 	unsigned char& value(int x, int y, int c) { return pixmap[y][x * channels + c]; }
 
+	// glDrawPixels writes a block of pixels to the screen
 	void show();
 
-	void switchChannel(ColorMode _showChannel);
+	// set display channel, it can be red, green, blue and rgba
+	void setDisplayChannel(ColorMode _showChannel) { displayMode = _showChannel; }
 
-	unsigned char** pixels() const {return pixmap;}
+	// get the block of pixels
+	unsigned char** pixels() const { return pixmap; }
 	const int Width() const { return width; }
 	const int Height() const { return height; }
 	const int Channels() const { return channels; }
@@ -47,8 +63,6 @@ private:
 	string filename;
 	unsigned char** pixmap;
 	unsigned char* data;
-	unsigned char** singleChannelPixmap;
-	unsigned char* singleChannelData;
 	int width;
 	int height;
 	int channels;

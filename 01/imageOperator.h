@@ -1,3 +1,11 @@
+//
+//	 Function set to operate images
+//
+//   CPSC 4040/6040            Xicheng WAng
+//
+//
+
+
 #ifndef IMAGE_OPERATOR_H
 #define IMAGE_OPERATOR_H
 

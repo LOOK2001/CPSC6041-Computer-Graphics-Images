@@ -29,6 +29,7 @@ void readOIIOImage(const string filename, Image* img)
 
 	if (!in->read_image(TypeDesc::UINT8, pixmap[0])) {
 		std::cerr << "Could not read pixels from" << filename << ", error = " << in->geterror() << "\n";
+		return;
 	}
 
 	img->reset(xres, yres);
@@ -62,8 +63,10 @@ void writeOIIOImage(const string outfilename, Image* img)
 		return;
 	}
 
+	int channels = img->Channels();
+
 	// Open a file for writing the image.
-	ImageSpec spec(w, h, 4, TypeDesc::UINT8);
+	ImageSpec spec(w, h, channels, TypeDesc::UINT8);
 	if(!outfile->open(outfilename, spec)){
 		cerr << "Could not open " << outfilename << ", error = " << geterror() << endl;
 		outfile->close();
@@ -101,6 +104,7 @@ void loadSingleChannel(Image* img, unsigned char** src)
 	int xres = img->Width();
 	int yres = img->Height();
 
+	// set the alpha byte for each pixel to 255
 	for (int i = 0; i < xres; i++) {
 		for (int j = 0; j < yres; j++) {
 			img->value(i, j, 3) = 255;

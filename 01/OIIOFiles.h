@@ -1,3 +1,11 @@
+//
+//	 Function set to read and wirte images
+//
+//   CPSC 4040/6040            Xicheng WAng
+//
+//
+
+
 #ifndef __OIIOFILES_H__
 #define __OIIOFILES_H__
 
