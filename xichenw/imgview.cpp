@@ -1,7 +1,6 @@
 //
-//	 Program reads and writes images, displays the image. The image remains cnetered
-//	 in the window. User can flip image vertically and horizonatlly and display only
-// 	 the red, green, or blue channel using the OpenImageIO API
+//	 Program reads and writes images, displays the image. User can flip image vertically
+//	 and horizonatlly and display only the red, green, or blue channel using the OpenImageIO API
 //
 //   Display window saved to a file with 'w' keypress
 //	 Read am image from a file with 'r' keypress
@@ -50,7 +49,6 @@ void displayImages() {
 
 	// clear window to background color
 	glClear(GL_COLOR_BUFFER_BIT);
-	glRasterPos2i(0, 0);
 
 	// writes a block of pixels to the framebuffer
 	if (currentImage){
@@ -59,32 +57,6 @@ void displayImages() {
 
 	// flush the OpenGL pipeline to the viewport
 	glFlush();
-}
-
-void handleReshape(int w, int h) {
-	int xres = img->Width();
-	int yres = img->Height();
-
-	float factor = 1;
-
-	// scale down image to the largest size when user decrease the size of window
-	if (w < xres || h < yres)
-	{
-		float xfactor = w / float(xres);
-		float yfactor = h / float(yres);
-		factor = (xfactor > yfactor) ? yfactor : xfactor;
-		glPixelZoom(factor, factor);
-	}
-
-	// set the image remain centered in the window
-	glViewport((w - xres * factor) /2, (h - yres * factor) / 2, w, h);
-
-	// define the drawing coordinate system on the viewport
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluOrtho2D(0, w, 0, h);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 }
 
 void handleKey(unsigned char key, int x, int y) {
@@ -102,17 +74,14 @@ void handleKey(unsigned char key, int x, int y) {
 		cout << "enter input image filename: ";
 		cin >> infilename;
 		cout << infilename << endl;
-		if (img){
+		if (img)
+		{
 			delete img;
 			img = new Image();
 		}
 		readOIIOImage(infilename, img);
 		currentImage = img;
-
-		// refresh window to remain image centered
-		handleReshape(WIDTH, HEIGHT);
 		displayImages();
-
 		break;
 	}
 
@@ -255,6 +224,33 @@ void handleSpecialKeypress(int key, int x, int y)
 			break;
 		}
 	}
+}
+
+void handleReshape(int w, int h) {
+
+	int xres = img->Width();
+	int yres = img->Height();
+
+	float factor = 1;
+
+	// scale down image to the largest size when user decrease the size of window
+	if (w < xres || h < yres)
+	{
+		float xfactor = w / float(xres);
+		float yfactor = h / float(yres);
+		factor = (xfactor > yfactor) ? yfactor : xfactor;
+		glPixelZoom(factor, factor);
+	}
+
+	// set the image remain centered in the window
+	glViewport((w - xres * factor) /2, (h - yres * factor) / 2, w, h);
+
+	// define the drawing coordinate system on the viewport
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(0, w, 0, h);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 int main(int argc, char* argv[]) {
