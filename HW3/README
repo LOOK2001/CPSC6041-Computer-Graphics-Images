@@ -1,0 +1,17 @@
+Xicheng Wang
+xichenw@clemson.edu
+
+Program reads and writes images, displays the image. User can flip image vertically and horizonatlly and display only the red, green, or blue channel.
+
+keyboard controls:
+Display window saved to a file with 'w' keypress
+Read am image from a file with 'r' keypress
+Invert color of the image with 'i' keypress
+Display red, green, blue channel with '1', '2', '3' keypress
+Display the image back to its original form with 'o' keypress
+Flip the image vertically and horizontally with 'v' and 'h'
+Read multiple images using command line and switch them with arrow keypress
+Program quits when either 'q' or ESC key is pressed
+
+command parameter:
+Allow user specify multiple filenames at the command line, and the first file name would be initial input file.
