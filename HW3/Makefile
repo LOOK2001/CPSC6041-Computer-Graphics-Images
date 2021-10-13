@@ -13,15 +13,25 @@ endif
 
 INCLUDES = -I ./
 
-PROJECT = imgview
+PROJECT1 = alphamask
+PROJECT2 = compose
 
-SOURCES = imgview.cpp image.cpp OIIOFiles.cpp imageOperator.cpp
+SOURCE = alphamask.cpp compose.cpp image.cpp OIIOFiles.cpp imageOperator.cpp
+SOURCES1 = alphamask.cpp image.cpp OIIOFiles.cpp imageOperator.cpp
+SOURCES2 = compose.cpp image.cpp OIIOFiles.cpp imageOperator.cpp
 
-$(PROJECT):	$(SOURCES:%.$(C)=%.o)
-	$(CC) $(SOURCES:%.$(C)=%.o) $(INCLUDES) $(LDFLAGS) -o $@
+all: ${PROJECT1} ${PROJECT2}
 
-$(SOURCES:%.$(C)=%.o):	%.o: %.$(C)
+$(PROJECT1):	$(SOURCES1:%.$(C)=%.o)
+	$(CC) $(SOURCES1:%.$(C)=%.o) $(INCLUDES) $(LDFLAGS) -o $@
+
+$(PROJECT2):	$(SOURCES2:%.$(C)=%.o)
+	$(CC) $(SOURCES2:%.$(C)=%.o) $(INCLUDES) $(LDFLAGS) -o $@
+
+$(SOURCE:%.$(C)=%.o):	%.o: %.$(C)
 	$(CC) -o $@ -c $(CFLAGS) $<
 
+
 clean:
-	rm -f core.* *.o *~ ${PROJECT}
+	rm -f core.* *.o *~ ${PROJECT1}
+	rm -f core.* *.o *~ ${PROJECT2}

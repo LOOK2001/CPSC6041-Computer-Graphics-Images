@@ -44,8 +44,14 @@ public:
 	void reset(int w, int h, int c = 4);
 
 	// get and set pixel value
-	const unsigned char& value(int x, int y, int c) const { return pixmap[y][x * channels + c]; }
-	unsigned char& value(int x, int y, int c) { return pixmap[y][x * channels + c]; }
+	const unsigned char& value(int x, int y, int c) const
+	{
+		return pixmap[y][x * channels + c];
+	}
+	unsigned char& value(int x, int y, int c)
+	{
+		return pixmap[y][x * channels + c];
+	}
 
 	// glDrawPixels writes a block of pixels to the screen
 	void show();

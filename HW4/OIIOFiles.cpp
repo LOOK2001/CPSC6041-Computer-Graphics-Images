@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 using namespace std;
 
@@ -116,16 +117,36 @@ void loadSingleChannel(Image* img, unsigned char** src)
 	}
 }
 
-void loadMultiChannels(Image* img, unsigned char** src, int channels)
+void loadMultiChannels(Image* img, unsigned char** src, int channels, bool isAssociated)
 {
 	int xres = img->Width();
 	int yres = img->Height();
 
-	for (int i = 0; i < xres; i++) {
-		for (int j = 0; j < yres; j++) {
-			img->value(i, j, 3) = 255;
-			for (int k = 0; k < channels; k++) {
-				img->value(i, j, k) = src[j][i * channels + k];
+	float alpha = 255.0f;
+	float a = 1.0;
+
+	if (channels == 3)
+		isAssociated = false;
+
+	if (!isAssociated)
+	{
+		for (int i = 0; i < xres; i++) {
+			for (int j = 0; j < yres; j++) {
+				img->value(i, j, 3) = 255;
+				for (int k = 0; k < channels; k++) {
+					img->value(i, j, k) = src[j][i * channels + k];
+				}
+			}
+		}
+	}else{
+		for (int i = 0; i < xres; i++) {
+			for (int j = 0; j < yres; j++) {
+				alpha = float(src[j][i * 4 + 3]);
+				a = alpha / 255.0f;
+				for (int k = 0; k < 3; k++) {
+					img->value(i, j, k) = src[j][i * channels + k] * a;
+				}
+				img->value(i, j, 3) = alpha;
 			}
 		}
 	}
@@ -136,4 +157,61 @@ void readThresholds(double &th_hl_1, double &th_hl_2, double &th_s_1, double &th
 {
 	fstream thresholdsFile("thresholds.txt");
     thresholdsFile >> th_hl_1 >> th_hl_2 >> th_s_1 >> th_s_2 >> th_v_1 >> th_v_2 >> th_hh_1 >> th_hh_2;
+}
+
+void readFilter(string filter_file, vector<vector<double>>& kernel)
+{
+	fstream filterFile(filter_file.c_str());
+	int kernel_size;
+
+	// Get kernel resize
+	double scale_factor;
+	filterFile >> kernel_size;
+
+	// Allocate memory for kernel 2D-array
+	kernel.resize(kernel_size);
+	for (int i = 0; i < kernel_size; i++)
+	{
+		kernel[i].resize(kernel_size);
+	}
+
+	// Get kernel values
+	double positive_sum = 0;
+	double negative_sum = 0;
+
+	std::cout << "Kernel size: " << kernel_size << std::endl;
+	std::cout << "Kernel: " << filter_file << std::endl;
+
+	for (int row = 0; row < kernel_size; row ++)
+	{
+		for (int col = 0; col < kernel_size; col ++)
+		{
+			filterFile >> kernel[row][col];
+			cout << kernel[row][col] << " ";
+			if (kernel[row][col] > 0)
+				positive_sum += kernel[row][col];
+			else
+				negative_sum += -1.0 * kernel[row][col];
+		}
+	}
+	cout << endl;
+
+	// Kernel normalization
+	double scale = max(positive_sum, negative_sum);
+	std::cout << "Scale factor: " << scale << std::endl;
+	if (scale != 0)
+		scale = 1.0 / scale;
+	else
+		scale = 1.0;
+
+	for (int row = 0; row < kernel_size; row ++){
+		for (int col = 0; col < kernel_size; col ++){
+			kernel[row][col] = scale * kernel[row][col];
+		}
+	}
+}
+
+char** getIter(char** begin, char** end, const std::string& option)
+{
+	return find(begin, end, option);
 }

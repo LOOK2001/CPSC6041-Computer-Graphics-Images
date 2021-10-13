@@ -1,0 +1,26 @@
+Xicheng Wang
+xichenw@clemson.edu
+
+There are two program here, Alphamask and Compose program.
+
+To compile: make
+
+Alphamask program:
+Program generate alpha channel mask for an image based upon image color information using the OpenImageIO API.
+You can modify thresholds value in the thresholds.txt. There are four value, hue_low, saturation, value, hue_high, in thresholds.txt file.
+For hand.jpg, I use hue_low:75 100, saturation: 0.55 0.65, value: 0.25 0.65, hue_high: 110 180 to generate alpha channel.
+Usage: alphamask <input_file_name> <output_file_name>
+keyboard controls:
+Alpha mask using chroma-keying method when o is pressed
+Alpha mask using Petro Vlahos method when p is pressed
+Spill suppression G = min(G, B) when s is pressed
+Increase or decrease k value for Petro Vlahos method using UP and DOWN key
+Program quits when either 'q' or ESC key is pressed
+
+
+Compose program:
+Program compose foreground and background image, displays the composed image using the OpenImageIO API.
+I composed dhouse_alpha.png and pokemon_back_1.jpg to get result1.png, hand_alpha.png and pokemon_back_1,jpg to get result2.png.
+Usage: compose <foreground_image_file> <background_image_file>
+keyboard controls:
+Program quits when either 'q' or ESC key is pressed
