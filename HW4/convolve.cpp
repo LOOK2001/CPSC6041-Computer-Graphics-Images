@@ -39,6 +39,7 @@ Image* outputImage = nullptr;
 string inputImageName;
 string outputImageName;
 string kernelName;
+Kernel kernel;
 Image* currentImage = nullptr;
 float k = 1.0f;
 
@@ -101,32 +102,31 @@ void handleKey(unsigned char key, int x, int y) {
 		exit(0);
 		break;
 
-	case 'o':
-	case 'O':{
-		std::cout << "switch to chroma-keying method" << std::endl;
-		ImageOperator::alphaMask(inputImage, outputImage);
-	}
-
-	case 'p':
-	case 'P':{
-		std::cout << "switch to Petro Vlahos method" << std::endl;
-		int width = inputImage->Width();
-		int height = inputImage->Height();
-
-		outputImage->reset(width, height, 4);
-
-		ImageOperator::alphaMaskPV(inputImage, outputImage, k);
+	case 'c':
+	case 'C':{
+		std::cout << "compute the convolution of the current image with " << kernelName << std::endl;
+		ImageOperator::filterImage(inputImage, outputImage, kernel);
+		inputImage = outputImage;
 		currentImage = outputImage;
 		displayImages();
 		break;
 	}
 
-	case 's':
-	case 'S':{
-		std::cout << "spill suppression using G = min(G, B)" << std::endl;
-		ImageOperator::spillSuppression(outputImage);
-		currentImage = outputImage;
+	case 'r':
+	case 'R':{
+		std::cout << "reload the original image " << std::endl;
+		readOIIOImage(inputImageName, inputImage);
+		currentImage = inputImage;
 		displayImages();
+		break;
+	}
+
+	case 'w':
+	case 'W':{
+		string outfilename;
+		cout << "enter output image filename: ";
+		cin >> outfilename;
+		writeOIIOImage(outfilename, currentImage);
 		break;
 	}
 
@@ -139,31 +139,12 @@ void handleSpecialKeypress(int key, int x, int y)
 {
 	// user can cycle between images by arrow keys
 	switch (key) {
-		case GLUT_KEY_UP:
-		{
-			k *= 1.01f;
-			std::cout << "k: " << k << std::endl;
-			ImageOperator::alphaMaskPV(inputImage, outputImage, k);
-			currentImage = outputImage;
-			displayImages();
-			break;
-		}
-		case GLUT_KEY_DOWN:
-		{
-			k *= 0.99f;
-			std::cout << "k: " << k << std::endl;
-			ImageOperator::alphaMaskPV(inputImage, outputImage, k);
-			currentImage = outputImage;
-			displayImages();
-			break;
-		}
-
 		defalut:
 			return;
 	}
 }
 
-bool parseCmdOption(int argc, char** argv, string& inputImgName, string& outputImgName, string& kernelName, double& theta, double& sigma, double& T, int& mode)
+bool parseCmdOption(int argc, char** argv, string& inputImgName, string& outputImgName, Kernel& kernel)
 {
 	if (argc < 3)
 		return false;
@@ -172,19 +153,34 @@ bool parseCmdOption(int argc, char** argv, string& inputImgName, string& outputI
 
 	if (iter != argv + argc)
 	{
-		if (iter != argv + argc)
+		kernelName = "Gabor Filter";
+		if (argc >= 6)
 		{
-			theta = atof(iter[0]);
-			sigma = atof(iter[1]);
-			T = atof(iter[2]);
+			double theta = atof(iter[1]);
+			double sigma = atof(iter[2]);
+			double peroid = atof(iter[3]);
+			std::cout << "theta: " << theta << std::endl;
+			std::cout << "sigma: " << sigma << std::endl;
+			std::cout << "peroid: " << peroid << std::endl;
+			kernel = ImageOperator::createGaborFilter(sigma, true, theta, peroid);
 		}
+		else
+		{
+			double sigma = atof(iter[1]);
+			std::cout << "sigma: " << sigma << std::endl;
+			kernel = ImageOperator::createGaborFilter(sigma, false);
+		}
+		inputImgName = argv[1];
+		std::cout <<"test4: " << strcmp(argv[2], "-g") << std::endl;
+		if (strcmp(argv[2], "-g"))
+			outputImgName = argv[2];
 	}
 	else
 	{
-		inputImageName = argv[1];
-		kernelName = argv[2];
-		if (argc > 3)
-		{
+		kernelName = argv[1];
+		inputImgName = argv[2];
+		readFilter(kernelName, kernel);
+		if (argc > 3){
 			outputImgName = argv[3];
 		}
 	}
@@ -194,22 +190,26 @@ bool parseCmdOption(int argc, char** argv, string& inputImgName, string& outputI
 
 int main(int argc, char* argv[]) {
 
-	Kernel kernel;
-
 	// to handle multiple command line
 	if (argc >= 1) // argc >= 3
 	{
+		//(int argc, char** argv, string& inputImgName, string& outputImgName, string& kernelName, double& theta, double& sigma, double& T, int& mode)
+		bool result = parseCmdOption(argc, argv, inputImageName, outputImageName, kernel);
+
+		if (!result)
+			return 0;
+
 		//inputImageName = argv[1];
-		inputImageName = "images/Lena.png";
+		//inputImageName = "images/Lena.png";
 		//kernelName = argv[2];
-		kernelName = "filters/box.filt";
+		//kernelName = "filters/box.filt";
 
 		inputImage = new Image();
 
 		readOIIOImage(inputImageName, inputImage);
 
 		//readFilter(kernelName, kernel);
-		kernel = ImageOperator::createGaborFilter(2);
+		//kernel = ImageOperator::createGaborFilter(2, true, 30.0, 100.0);
 
 		int xres = inputImage->Width();
 		int yres = inputImage->Height();
@@ -217,14 +217,13 @@ int main(int argc, char* argv[]) {
 		outputImage = new Image();
 		outputImage->reset(xres, yres, nChannel);
 
-		if (argc >= 1) // argc >= 4
-		{
-			//outputImageName = argv[3];
-			outputImageName = "test.png";
-			//writeOIIOImage(outputImageName, outputImage);
-		}
-
 		ImageOperator::filterImage(inputImage, outputImage, kernel);
+
+		std::cout << "outName: " << outputImageName << std::endl;
+		if (!outputImageName.empty()) // argc >= 4
+		{
+			writeOIIOImage(outputImageName, outputImage);
+		}
 
 		currentImage = outputImage;
 	}else{

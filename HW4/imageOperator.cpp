@@ -299,7 +299,7 @@ void ImageOperator::convolve(const Image* img, double** in, double** out, const 
                     }
                 }
             }
-            // Boundary conditions
+            // Boundary conditions: Using reflection when kernels extends beyound the boundary
             else{
                 for (int i = 0; i > kernel_size; i++){
                     for (int j = 0; j < kernel_size; j++){
@@ -330,6 +330,7 @@ void ImageOperator::filterImage(Image* img, Image* out, const vector<vector<doub
 
     for (int channel = 0; channel < nChannel; channel ++)
     {
+        // Scale each channel between 0 and 1
         for (int row = 0; row < yres; row ++){
             for (int col = 0; col < xres; col ++){
                 if (channel == 3){
@@ -340,10 +341,17 @@ void ImageOperator::filterImage(Image* img, Image* out, const vector<vector<doub
                 tmp[row][col] = float(img->value(row, col, channel)) / 255.0;
             }
         }
+
+        // Compute convolution
         convolve(img, tmp, result, kernel);
 
+        //Rescale each channel between 0 to 255
         for(int row = 0; row < yres; row++){
             for (int col = 0; col < xres; col++){
+                // Skip alpha channel
+                if (channel == 3){
+                    continue;
+                }
                 out->value(row, col, channel) = 255 * abs(result[row][col]);
             }
         }
@@ -358,17 +366,17 @@ void ImageOperator::filterImage(Image* img, Image* out, const vector<vector<doub
     delete [] result;
 }
 
-Kernel ImageOperator:: createGaborFilter(double sigma)
+Kernel ImageOperator:: createGaborFilter(double sigma, bool isAdvanced, double theta, double T)
 {
     int kernel_center;
     int kernel_size;
-    Kernel gaborFilter;
+    Kernel filter;
     kernel_size = 4 * sigma + 1;
     kernel_center = 2 * sigma;
 
-    gaborFilter.resize(kernel_size);
+    filter.resize(kernel_size);
     for ( int i = 0; i < kernel_size; i++)
-        gaborFilter[i].resize(kernel_size);
+        filter[i].resize(kernel_size);
 
     std::cout << "Kernel size: " << kernel_size << std::endl;
     double positive_sum = 0.0;
@@ -383,29 +391,40 @@ Kernel ImageOperator:: createGaborFilter(double sigma)
             x = (col > 0) ? (col + 0.5 - kernel_center) : (col - 0.5 - kernel_center);
             y = (row > 0) ? (row + 0.5 - kernel_center) : (row - 0.5 - kernel_center);
 
-            xx = x * x;
-            yy = y * y;
-            // Weights of a Gaussian
-            gaborFilter[row][col] = exp(-(xx + yy) / (2 * sigma * sigma));
-
-            if (gaborFilter[row][col] > 0)
-                positive_sum += gaborFilter[row][col];
+            // Advanced Gabor filter. User input theta and period
+            if (isAdvanced)
+            {
+                xx = x * cos(theta * M_PI / 180.0f) + y * sin(theta * M_PI / 180.0f);
+                yy = -x * sin(theta * M_PI / 180.0f) + y * cos(theta * M_PI / 180.0f);
+                filter[row][col] = exp(-(pow(xx, 2.0) + pow(yy, 2.0)) / (2 * pow(sigma, 2.0))) * cos(2 * M_PI * xx / T);
+            }
+            // Simple Gabor filter
             else
-                negative_sum += -gaborFilter[row][col];
+            {
+                xx = x * x;
+                yy = y * y;
+                filter[row][col] = exp(-(xx + yy) / (2 * sigma * sigma));
+            }
 
-            std::cout << gaborFilter[row][col] << " ";
+            if (filter[row][col] > 0)
+                positive_sum += filter[row][col];
+            else
+                negative_sum += -filter[row][col];
         }
     }
     std::cout << std::endl;
 
     double scale = max(positive_sum, negative_sum);
+    // Clamp scale value
+    scale = max(0.0, min(scale, 255.0));
     std::cout << "Scale factor: " << scale << std::endl;
+    // Normalize the kernel weights
     for (int row = 0; row < kernel_size; row ++)
     {
         for (int col = 0; col < kernel_size; col++)
         {
-            gaborFilter[row][col] =  gaborFilter[row][col] / scale;
+            filter[row][col] =  filter[row][col] / scale;
         }
     }
-    return gaborFilter;
+    return filter;
 }
