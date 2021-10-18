@@ -159,7 +159,7 @@ void readThresholds(double &th_hl_1, double &th_hl_2, double &th_s_1, double &th
     thresholdsFile >> th_hl_1 >> th_hl_2 >> th_s_1 >> th_s_2 >> th_v_1 >> th_v_2 >> th_hh_1 >> th_hh_2;
 }
 
-void readFilter(string filter_file, vector<vector<double>>& kernel)
+Kernel readFilter(string filter_file, Kernel& kernel)
 {
 	fstream filterFile(filter_file.c_str());
 	int kernel_size;
@@ -209,6 +209,8 @@ void readFilter(string filter_file, vector<vector<double>>& kernel)
 			kernel[row][col] = scale * kernel[row][col];
 		}
 	}
+	ImageOperator::flipKernel(kernel);
+	return kernel;
 }
 
 char** getIter(char** begin, char** end, const std::string& option)

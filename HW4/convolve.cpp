@@ -1,12 +1,11 @@
 //
-//	 Program generate alpha channel mask for an image based upon image color information
-//	 using the OpenImageIO API
+//	 Program will filter images using convolution using the OpenImageIO API and OpenGL
 //
 //	 Alpha mask using chroma-keying method when o is pressed
 //	 Alpha mask using Petro Vlahos method when p is pressed
 // 	 Spill suppression G = min(G, B) when s is pressed
 // 	 Increase or decrease k value for Petro Vlahos method using UP and DOWN key
-//   Program quits when either 'q' or ESC key is pressed
+//   'q' or ESC key is pressed: Program quits 
 //
 //   CPSC 4040/6040            Xicheng Wang
 //
@@ -190,37 +189,31 @@ bool parseCmdOption(int argc, char** argv, string& inputImgName, string& outputI
 
 int main(int argc, char* argv[]) {
 
-	// to handle multiple command line
-	if (argc >= 1) // argc >= 3
+	// To handle multiple command line
+	if (argc >= 1)
 	{
-		//(int argc, char** argv, string& inputImgName, string& outputImgName, string& kernelName, double& theta, double& sigma, double& T, int& mode)
+		// Read image name and kernel from command line
 		bool result = parseCmdOption(argc, argv, inputImageName, outputImageName, kernel);
 
 		if (!result)
 			return 0;
 
-		//inputImageName = argv[1];
-		//inputImageName = "images/Lena.png";
-		//kernelName = argv[2];
-		//kernelName = "filters/box.filt";
-
+		// Read image from a file
 		inputImage = new Image();
-
 		readOIIOImage(inputImageName, inputImage);
 
-		//readFilter(kernelName, kernel);
-		//kernel = ImageOperator::createGaborFilter(2, true, 30.0, 100.0);
-
+		// Create ouput image with same size as input image
 		int xres = inputImage->Width();
 		int yres = inputImage->Height();
 		int nChannel = inputImage->Channels();
 		outputImage = new Image();
 		outputImage->reset(xres, yres, nChannel);
 
+		// Compute the convolution of the input image
 		ImageOperator::filterImage(inputImage, outputImage, kernel);
 
-		std::cout << "outName: " << outputImageName << std::endl;
-		if (!outputImageName.empty()) // argc >= 4
+		// Write the output image if user type output image name
+		if (!outputImageName.empty())
 		{
 			writeOIIOImage(outputImageName, outputImage);
 		}

@@ -24,7 +24,7 @@ void readThresholds(double &th_hl_1, double &th_hl_2, double &th_s_1, double &th
                     double &th_hh_2);
 
 // Read filter kernel from filter file
-void readFilter(string filter, vector<vector<double>>& kernel);
+Kernel readFilter(string filter, Kernel& kernel);
 
 char** getIter(char** begin, char** end, const std::string& option);
 

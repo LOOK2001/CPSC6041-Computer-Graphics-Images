@@ -307,12 +307,13 @@ void ImageOperator::convolve(const Image* img, double** in, double** out, const 
                     }
                 }
             }
+            sum = max(0.0, min(sum, 255.0));
             out[row + n][col + n] = sum;
         }
     }
 }
 
-void ImageOperator::filterImage(Image* img, Image* out, const vector<vector<double>>& kernel)
+void ImageOperator::filterImage(Image* img, Image* out, const Kernel& kernel)
 {
     int xres = img->Width();
     int yres = img->Height();
@@ -426,5 +427,19 @@ Kernel ImageOperator:: createGaborFilter(double sigma, bool isAdvanced, double t
             filter[row][col] =  filter[row][col] / scale;
         }
     }
+
+    ImageOperator::flipKernel(filter);
     return filter;
+}
+
+void ImageOperator::flipKernel(Kernel& kernel)
+{
+	int h = kernel.size();
+	int w = kernel[0].size();
+
+	for (int i = 0; i < h; i++)
+	{
+		std::reverse(kernel[i].begin(), kernel[i].end());
+	}
+	std::reverse(kernel.begin(), kernel.end());
 }

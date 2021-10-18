@@ -44,6 +44,7 @@ int reflectBorder(int index, int total);
 void convolve(const Image* img, double** in, double** out, const vector<vector<double>>& kernel);
 void filterImage(Image* img, Image* out, const vector<vector<double>>& kernel);
 Kernel createGaborFilter(double sigma, bool isAdvanced=false, double theta=0.0, double T=0.0);
+void flipKernel(Kernel& kernel);
 }
 
 #endif // IMAGE_OPERATOR_H
