@@ -1,11 +1,10 @@
 //
 //	 Program will filter images using convolution using the OpenImageIO API and OpenGL
 //
-//	 Alpha mask using chroma-keying method when o is pressed
-//	 Alpha mask using Petro Vlahos method when p is pressed
-// 	 Spill suppression G = min(G, B) when s is pressed
-// 	 Increase or decrease k value for Petro Vlahos method using UP and DOWN key
-//   'q' or ESC key is pressed: Program quits 
+//	 'c' pressed: Compute the convolution of the current image
+//	 'r' pressed: Reload the original image
+//	 'w' pressed: Write the currently displayed image to a file
+//	 'q' or ESC key is pressed: Program quits
 //
 //   CPSC 4040/6040            Xicheng Wang
 //
