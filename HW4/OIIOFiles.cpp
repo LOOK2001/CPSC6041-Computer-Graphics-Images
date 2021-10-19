@@ -187,14 +187,12 @@ Kernel readFilter(string filter_file, Kernel& kernel)
 		for (int col = 0; col < kernel_size; col ++)
 		{
 			filterFile >> kernel[row][col];
-			cout << kernel[row][col] << " ";
 			if (kernel[row][col] > 0)
 				positive_sum += kernel[row][col];
 			else
 				negative_sum += -1.0 * kernel[row][col];
 		}
 	}
-	cout << endl;
 
 	// Kernel normalization
 	double scale = max(positive_sum, negative_sum);
@@ -209,6 +207,8 @@ Kernel readFilter(string filter_file, Kernel& kernel)
 			kernel[row][col] = scale * kernel[row][col];
 		}
 	}
+
+	// Flip kernel both horizontally and vertically
 	ImageOperator::flipKernel(kernel);
 	return kernel;
 }

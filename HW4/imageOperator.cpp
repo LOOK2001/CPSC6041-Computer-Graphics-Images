@@ -335,11 +335,10 @@ void ImageOperator::filterImage(Image* img, Image* out, const Kernel& kernel)
         for (int row = 0; row < yres; row ++){
             for (int col = 0; col < xres; col ++){
                 if (channel == 3){
-                    out->value(row, col, channel) = img->value(row, col, channel);
+                    out->value(col, row, channel) = img->value(col, row, channel);
                     continue;
                 }
-
-                tmp[row][col] = float(img->value(row, col, channel)) / 255.0;
+                tmp[row][col] = float(img->value(col, row, channel)) / 255.0;
             }
         }
 
@@ -353,7 +352,7 @@ void ImageOperator::filterImage(Image* img, Image* out, const Kernel& kernel)
                 if (channel == 3){
                     continue;
                 }
-                out->value(row, col, channel) = 255 * abs(result[row][col]);
+                out->value(col, row, channel) = 255 * abs(result[row][col]);
             }
         }
     }
@@ -395,6 +394,7 @@ Kernel ImageOperator:: createGaborFilter(double sigma, bool isAdvanced, double t
             // Advanced Gabor filter. User input theta and period
             if (isAdvanced)
             {
+                // convert theta to radians
                 xx = x * cos(theta * M_PI / 180.0f) + y * sin(theta * M_PI / 180.0f);
                 yy = -x * sin(theta * M_PI / 180.0f) + y * cos(theta * M_PI / 180.0f);
                 filter[row][col] = exp(-(pow(xx, 2.0) + pow(yy, 2.0)) / (2 * pow(sigma, 2.0))) * cos(2 * M_PI * xx / T);
@@ -413,7 +413,6 @@ Kernel ImageOperator:: createGaborFilter(double sigma, bool isAdvanced, double t
                 negative_sum += -filter[row][col];
         }
     }
-    std::cout << std::endl;
 
     double scale = max(positive_sum, negative_sum);
     // Clamp scale value
