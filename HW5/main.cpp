@@ -26,7 +26,7 @@
 
 #include "image.h"
 #include "OIIOFiles.h"
-#include "matrix.h"
+#include "warperHelper.h"
 
 using namespace std;
 OIIO_NAMESPACE_USING
@@ -104,16 +104,6 @@ void handleKey(unsigned char key, int x, int y) {
 		exit(0);
 		break;
 
-	case 'c':
-	case 'C':{
-		std::cout << "compute the convolution of the current image with " << kernelName << std::endl;
-		ImageOperator::filterImage(inputImage, outputImage, kernel);
-		inputImage = outputImage;
-		currentImage = outputImage;
-		displayImages();
-		break;
-	}
-
 	case 'r':
 	case 'R':{
 		std::cout << "reload the original image " << std::endl;
@@ -146,22 +136,6 @@ void handleSpecialKeypress(int key, int x, int y)
 	}
 }
 
-bool parseCmdOption(int argc, char** argv, string& inputImgName, string& outputImgName)
-{
-	if (argc <= 2)
-		return false;
-
-	inputImgName = argv[2];
-
-	if (argc > 2)
-	{
-		outputImgName = argv[3];
-	}
-
-
-	return true;
-}
-
 /*
 Build a transformation matrix from input text
 */
@@ -191,6 +165,18 @@ void read_input(Matrix3D &M) {
 					}
 					break;
 				case 's':		/* scale, accept scale factors */
+					float sx, sy;
+					cin >> sx;
+					cin >> sy;
+					if (cin){
+						cout << "calling scale\n";
+						Scale(M, sx, sy);
+					}
+					else{
+						cerr << "invalid scaling value\n";
+						cin.clear();
+					}
+					M.scale()
 					break;
 				case 't':		/* Translation, accept translations */
 					break;
@@ -212,17 +198,31 @@ void read_input(Matrix3D &M) {
 int main(int argc, char* argv[]) {
 
 	// To handle multiple command line
-	if (argc > 2)
+	if (argc >= 2)
 	{
 		// initialize transformation matrix to identity
 		Matrix M;
 
 		// read input image
 		inputImageName = argv[1];
+		readOIIOImage(inputImageName, inputImage)
 		
-
 		// build the transformation matrix based on user input
 		read_input(M);
+		std::vector<Vector2D> box = ImageOperator::getBoundingBox(M, inputImage)
+
+		// Print out the final matrix
+		std::cout << "Accumulated Matrix: " << std::endl;
+		M.print();
+
+		// Inverse mapping
+
+
+		if (argc >= 3)
+		{
+			outputImageName = argv[2]
+			writeOIIOImage(outputImageName, inputImage);
+		}
 	}
 	else
 	{

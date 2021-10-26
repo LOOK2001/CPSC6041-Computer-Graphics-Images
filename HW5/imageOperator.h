@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "image.h"
+#include "matrix.h"
 
 using namespace std;
 
@@ -42,14 +43,23 @@ void compose(Image* front, Image* back, Image* compose, int posX, int posY);
 
 // Reture reflected index
 int reflectBorder(int index, int total);
+
 // Convolutional operation for each pixel
 void convolve(const Image* img, double** in, double** out, const vector<vector<double>>& kernel);
+
 // Filter image
 void filterImage(Image* img, Image* out, const vector<vector<double>>& kernel);
+
 // Generate gabor kernel sigma, theta and period
 Kernel createGaborFilter(double sigma, bool isAdvanced=false, double theta=0.0, double T=0.0);
+
 // Filp the kernel both horizontally and vertically
 void flipKernel(Kernel& kernel);
+
+// 
+std::vector<Vector2D> getBoundingBox(Matrix &M, Image *img);
+
+void inverseMap(Image *in, Image *out);
 }
 
 #endif // IMAGE_OPERATOR_H
