@@ -170,13 +170,13 @@ void read_input(Matrix3D &M) {
 					cin >> sy;
 					if (cin){
 						cout << "calling scale\n";
+						std::cout << sx << sy << std::endl;
 						Scale(M, sx, sy);
 					}
 					else{
 						cerr << "invalid scaling value\n";
 						cin.clear();
 					}
-					M.scale()
 					break;
 				case 't':		/* Translation, accept translations */
 					break;
@@ -201,15 +201,16 @@ int main(int argc, char* argv[]) {
 	if (argc >= 2)
 	{
 		// initialize transformation matrix to identity
-		Matrix M;
+		Matrix3D M;
 
 		// read input image
 		inputImageName = argv[1];
-		readOIIOImage(inputImageName, inputImage)
-		
+		inputImage = new Image();
+		readOIIOImage(inputImageName, inputImage);
+
 		// build the transformation matrix based on user input
 		read_input(M);
-		std::vector<Vector2D> box = ImageOperator::getBoundingBox(M, inputImage)
+		std::vector<Vector3D> box = ImageOperator::getBoundingBox(M, inputImage);
 
 		// Print out the final matrix
 		std::cout << "Accumulated Matrix: " << std::endl;
@@ -220,8 +221,9 @@ int main(int argc, char* argv[]) {
 
 		if (argc >= 3)
 		{
-			outputImageName = argv[2]
-			writeOIIOImage(outputImageName, inputImage);
+			outputImageName = argv[2];
+			outputImage = new Image();
+			writeOIIOImage(outputImageName, outputImage);
 		}
 	}
 	else

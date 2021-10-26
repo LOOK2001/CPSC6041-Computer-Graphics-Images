@@ -21,6 +21,9 @@ void Rotate(Matrix3D &M, float theta){
     R[0][1] = -sin(theta);
     R[1][0] = sin(theta);
     R[1][1] = cos(theta);
+
+    // append the rotation to transformation Matrix
+    M = R * M;
 }
 
 /*
@@ -31,6 +34,8 @@ void Scale(Matrix3D &M, float sx, float sy)
     Matrix3D R;
     R[0][0] = sx;
     R[1][1] = sy;
+
+    M = R * M;
 }
 
 /*
@@ -39,8 +44,10 @@ Multiply M by a translation matrix of value dx, dy
 void translate(Matrix3D &M, float dx, float dy)
 {
     Matrix3D R;
-    R[0][0] = sx;
-    R[1][1] = sy;
+    R[0][0] = dx;
+    R[1][1] = dy;
+
+    M = R * M;
 }
 
 /*
@@ -51,6 +58,8 @@ void flip(Matrix3D &M, float xf, float yf)
     Matrix3D R;
     if (xf == 1) R[0][0] = -1;
     if (yf == 1) R[1][1] = -1;
+
+    M = R * M;
 }
 
 /*
@@ -61,6 +70,8 @@ void shear(Matrix3D &M, float hx, float hy)
     Matrix3D R;
     R[0][1] = hx;
     R[1][0] = hy;
+
+    M = R * M;
 }
 
 /*
@@ -71,6 +82,8 @@ void perspective(Matrix3D &M, float px, float py)
     Matrix3D R;
     R[2][0] = px;
     R[2][1] = py;
+
+    M = R * M;
 }
 
 #endif // IMAGE_OPERWARPER_HELPER_HATOR_H

@@ -443,18 +443,27 @@ void ImageOperator::flipKernel(Kernel& kernel)
 	std::reverse(kernel.begin(), kernel.end());
 }
 
-std::vector<Vector2D> ImageOperator::getBoundingBox(Matrix &M, Image *img)
+std::vector<Vector3D> ImageOperator::getBoundingBox(Matrix3D &M, Image *img)
 {
-    std::vector<Vector2D> box;
+    std::vector<Vector3D> box;
     box.resize(4);
 
-    int xres = img->Width();
-    int yres = img->Height();
+    double xres = double(img->Width());
+    double yres = double(img->Height());
 
-    box[0] = M * Vector2D(0.0, 0.0);
-    box[1] = M * Vector2D(0.0, yres);
-    box[2] = M * Vector2D(xres, yres);
-    box[3] = M * Vector2D(xres, 0.0);
+    box[0] = M * Vector3D{0.0, 0.0, 1.0};
+    box[1] = M * Vector3D{0.0, yres, 1.0};
+    box[2] = M * Vector3D{xres, yres, 1.0};
+    box[3] = M * Vector3D{xres, 0.0, 1.0};
+
+    // Normalize
+    for (int i = 0; i < 4; i++)
+    {
+        box[i].x = box[i].x / box[i].z;
+        box[i].y = box[i].y / box[i].z;
+        box[i].z = box[i].z / box[i].z;
+    }
+
 
     double x_min, x_max, y_min, y_max;
     x_min = box[0].x;
@@ -471,7 +480,7 @@ std::vector<Vector2D> ImageOperator::getBoundingBox(Matrix &M, Image *img)
     }
 
     std::cout << "Size of output image: " << (x_max-x_min) << "-" << (y_max-y_min) << std::endl;
-    
+
     // translate origin
     M[0][2] = 0 - x_min;
     M[1][2] = 0 - y_min;
@@ -481,5 +490,5 @@ std::vector<Vector2D> ImageOperator::getBoundingBox(Matrix &M, Image *img)
 
 void ImageOperator::inverseMap(Image *in, Image *out)
 {
-    
+
 }

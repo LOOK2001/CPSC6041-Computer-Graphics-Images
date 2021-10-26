@@ -4,6 +4,9 @@
 *   The code is based on previous code from D. House
 */
 
+#ifndef MATRIX_H
+#define MATRIX_H
+
 #include <cstdio>
 #include <cmath>
 
@@ -26,7 +29,7 @@ struct Vector2D{
 class Matrix3D{
 private:
   double M[3][3];
-  
+
 public:
   Matrix3D();
   Matrix3D(const double coefs[3][3]);
@@ -36,11 +39,11 @@ public:
 
   void setidentity();
   void set(const double coefs[3][3]);
-  
+
   double determinant() const;
   Matrix3D adjoint() const;
   Matrix3D inverse() const;
-  
+
   Vector3D operator*(const Vector2D &v) const;
   Vector3D operator*(const Vector3D &v) const;
   Matrix3D operator*(const Matrix3D &m2) const;
@@ -57,3 +60,5 @@ struct BilinearCoeffs{
 void setbilinear(double width, double height,
 		 Vector2D xycorners[4], BilinearCoeffs &coeff);
 void invbilinear(const BilinearCoeffs &c, Vector2D xy, Vector2D &uv);
+
+#endif // MATRIX_H

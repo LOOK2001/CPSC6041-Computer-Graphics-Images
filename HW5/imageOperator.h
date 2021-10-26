@@ -56,8 +56,8 @@ Kernel createGaborFilter(double sigma, bool isAdvanced=false, double theta=0.0, 
 // Filp the kernel both horizontally and vertically
 void flipKernel(Kernel& kernel);
 
-// 
-std::vector<Vector2D> getBoundingBox(Matrix &M, Image *img);
+//
+std::vector<Vector3D> getBoundingBox(Matrix3D &M, Image *img);
 
 void inverseMap(Image *in, Image *out);
 }

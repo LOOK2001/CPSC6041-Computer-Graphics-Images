@@ -9,6 +9,9 @@ using namespace std;
 
 void readOIIOImage(const string filename, Image* img)
 {
+	if (!img)
+		img =  new Image();
+		
 	int xres, yres, channels;
 	auto in = ImageInput::open(filename);
 	if (!in) {
