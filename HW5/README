@@ -1,0 +1,22 @@
+Xicheng Wang
+xichenw@clemson.edu
+
+Program will filter images using convolution from a convolutional kernel read from a filter file or gabor filter kernel generated from parameters using the OpenImageIO API and OpenGL
+
+To compile: make
+
+Usage: 
+./convolve <filter_file_name> <input_file_name> [<output_file_name>]
+or
+./convolve <input_file_name> [<output_file_name>] <-g> <theta> <sigma> <peroid>
+
+For example:
+./convolve filters/tent.filt images/Lena.png Lena0.png
+./convolve images/Lena.png Lena1.png -g 4
+./convolve images/Lena.png Lena2.png -g 45 4 8
+
+keyboard controls:
+'c' pressed: Compute the convolution of the current image
+'r' pressed: Reload the original image
+'w' pressed: Write the currently displayed image to a file
+'q' or ESC key is pressed: Program quits
