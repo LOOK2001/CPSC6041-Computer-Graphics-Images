@@ -443,10 +443,11 @@ void ImageOperator::flipKernel(Kernel& kernel)
 	std::reverse(kernel.begin(), kernel.end());
 }
 
-std::vector<Vector3D> ImageOperator::getBoundingBox(Matrix3D &M, Image *img)
+AABB ImageOperator::getBoundingBox(Matrix3D &M, Image *img)
 {
     std::vector<Vector3D> box;
     box.resize(4);
+    AABB result;
 
     double xres = double(img->Width());
     double yres = double(img->Height());
@@ -474,21 +475,153 @@ std::vector<Vector3D> ImageOperator::getBoundingBox(Matrix3D &M, Image *img)
     for (int i = 1; i < 4; i++)
     {
         x_min = min(x_min, box[i].x);
-        x_max = max(x_min, box[i].x);
+        x_max = max(x_max, box[i].x);
         y_min = min(y_min, box[i].y);
         y_max = max(y_max, box[i].y);
     }
 
-    std::cout << "Size of output image: " << (x_max-x_min) << "-" << (y_max-y_min) << std::endl;
+    std::cout << "x min: " << x_min;
+    std::cout << " x max: " << x_max;
+    std::cout << " y min: " << y_min;
+    std::cout << " y max: " << y_max << std::endl;
+
+    std::cout << "Size of output image: " << ceil(x_max-x_min) << "-" << ceil(y_max-y_min) << std::endl;
 
     // translate origin
-    M[0][2] = 0 - x_min;
-    M[1][2] = 0 - y_min;
+    Matrix3D translate;
+    translate[0][2] = 0 - x_min;
+    translate[1][2] = 0 - y_min;
+    M = translate * M;
 
-    return box;
+    result.min.x = x_min;
+    result.min.y = y_min;
+    result.max.x = x_max;
+    result.max.y = y_max;
+    return result;
 }
 
-void ImageOperator::inverseMap(Image *in, Image *out)
+void ImageOperator::inverseMap(Image *in, Image *out, const Matrix3D& invMat)
 {
+    int in_width = in->Width();
+    int in_height = in->Height();
 
+    int width = out->Width();
+    int height = out->Height();
+    int nChannel = out->Channels();
+
+    // Loop through output image
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            // pixel coordinate
+            Vector3D out_pos(i + 0.5, j + 0.5, 1.0);
+
+            // inverse mapping
+            Vector3D in_pos = invMat * out_pos;
+            in_pos.x = in_pos.x / in_pos.z;
+            in_pos.y = in_pos.y / in_pos.z;
+
+            int u, v;
+            u = floor(in_pos.x);
+            v = floor(in_pos.y);
+            if (u < in_width && u >= 0.0 && v < in_height && v > 0.0)
+            {
+                for (int k = 0; k < nChannel; k ++)
+                    out->value(i, j, k) = in->value(u, v, k);
+            }
+            else
+            {
+                for (int k = 0; k < nChannel; k ++)
+                    out->value(i, j, k) = 0.0;
+            }
+        }
+    }
+}
+
+void ImageOperator::bilinear(const Matrix3D& M, Image *in, Image *out)
+{
+    int in_width = in->Width();
+    int in_height = in->Height();
+
+    int out_width = out->Width();
+    int out_height = out->Height();
+    int out_nChannel = out->Channels();
+
+    // Calculate xycorners
+    Vector2D xycorners[4];
+    Vector3D p1 = M * Vector2D{0.0, 0.0};
+    Vector3D p2 = M * Vector2D{0.0, double(in_height)};
+    Vector3D p3 = M * Vector2D{double(in_width), double(in_height)};
+    Vector3D p4 = M * Vector2D{double(in_width), 0.0};
+    xycorners[0] = Vector2D{p1.x / p1.z, p1.y / p1.z};
+    xycorners[1] = Vector2D{p2.x / p2.z, p2.y / p2.z};
+    xycorners[2] = Vector2D{p3.x / p3.z, p3.y / p3.z};
+    xycorners[3] = Vector2D{p4.x / p4.z, p4.y / p4.z};
+
+    BilinearCoeffs coeff;
+    setbilinear(in_width, in_height, xycorners, coeff);
+
+    for (int i = 0; i < out_width; i++)
+    {
+        for (int j = 0; j < out_height; j++)
+        {
+            Vector2D xy, uv;
+            xy.x = i + 0.5;
+            xy.y = j + 0.5;
+            invbilinear(coeff, xy, uv);
+
+            int u, v;
+            u = floor(uv.x);
+            v = floor(uv.y);
+
+            if (u < in_width && u >= 0.0 && v < in_height && v > 0.0)
+            {
+                for (int k = 0; k < out_nChannel; k ++)
+                    out->value(i, j, k) = in->value(u, v, k);
+            }
+            else
+            {
+                for (int k = 0; k < out_nChannel; k ++)
+                    out->value(i, j, k) = 0.0;
+            }
+        }
+    }
+}
+
+void ImageOperator::inverseTwirl(Image *in, Image*out, Vector2D center, const double strength)
+{
+    int in_width = in->Width();
+    int in_height = in->Height();
+    center.x *= in_width;
+    center.y *= in_height;
+
+    int out_width = out->Width();
+    int out_height = out->Height();
+    int nChannels = out->Channels();
+
+    double theta = 0.0;
+    double r = 0.0;
+    int minDim = min(in_width, in_height);
+
+    for (int i = 0; i < out_width; i++)
+    {
+        for (int j = 0; j < out_height; j++)
+        {
+            r = sqrt(pow(i - center.x, 2) + pow(j - center.y, 2));
+            theta = atan2(j - center.y, i - center.x);
+
+            int ii = center.x + r * cos(theta + strength * (r - minDim) / minDim);
+            int jj = center.y + r * sin(theta + strength * (r - minDim) / minDim);
+
+            if (ii < in_width && ii >= 0 && jj < in_height && jj >= 0)
+            {
+                for (int k = 0; k < nChannels; k ++)
+                    out->value(i, j, k) = in->value(ii, jj, k);
+            }
+            else
+            {
+                for (int k = 0; k < nChannels; k ++)
+                    out->value(i, j, k) = 0.0;
+            }
+        }
+    }
 }

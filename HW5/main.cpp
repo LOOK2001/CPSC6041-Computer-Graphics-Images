@@ -35,7 +35,6 @@ OIIO_NAMESPACE_USING
 #define WIDTH 600
 #define HEIGHT 600
 
-string filename = "images/cube.ppm";
 Image* inputImage = nullptr;
 Image* outputImage = nullptr;
 string inputImageName;
@@ -122,6 +121,24 @@ void handleKey(unsigned char key, int x, int y) {
 		break;
 	}
 
+	case 'n':
+	case 'N':{
+		cout << "Twirl warp " << std::endl;
+		cout << "enter center and strength: ";
+		double x, y, strength;
+		cin >> x >> y >> strength;
+		Vector2D center = Vector2D{x, y};
+
+		int width = inputImage->Width();
+		int height = inputImage->Height();
+		outputImage->reset(width, height);
+
+		ImageOperator::inverseTwirl(inputImage, outputImage, center, strength);
+		currentImage = outputImage;
+		displayImages();
+		break;
+	}
+
 	defalut:
 		return;
 	}
@@ -166,11 +183,10 @@ void read_input(Matrix3D &M) {
 					break;
 				case 's':		/* scale, accept scale factors */
 					float sx, sy;
-					cin >> sx;
-					cin >> sy;
+					cin >> sx >> sy;
 					if (cin){
 						cout << "calling scale\n";
-						std::cout << sx << sy << std::endl;
+						std::cout << sx << " " << sy << std::endl;
 						Scale(M, sx, sy);
 					}
 					else{
@@ -179,12 +195,56 @@ void read_input(Matrix3D &M) {
 					}
 					break;
 				case 't':		/* Translation, accept translations */
+					float dx, dy;
+					cin >> dx >> dy;
+					if (cin){
+						cout << "calling translate\n";
+						std::cout << dx << " " << dy << std::endl;
+						translate(M, dx, dy);
+					}
+					else{
+						cerr << "invalid translation value\n";
+						cin.clear();
+					}
 					break;
 				case 'h':		/* Shear, accept shear factors */
+					float hx, hy;
+					cin >> hx >> hy;
+					if (cin){
+						cout << "calling shear\n";
+						std::cout << hx << " " << hy << std::endl;
+						shear(M, hx, hy);
+					}
+					else{
+						cerr << "invalid shear value\n";
+						cin.clear();
+					}
 					break;
 				case 'f':		/* Flip, accept flip factors */
+					float fx, fy;
+					cin >> fx >> fy;
+					if (cin){
+						cout << "calling flip\n";
+						std::cout << fx << " " << fy << std::endl;
+						flip(M, fx, fy);
+					}
+					else{
+						cerr << "invalid flip value\n";
+						cin.clear();
+					}
 					break;
 				case 'p':		/* Perspective, accept perspective factors */
+					float px, py;
+					cin >> px >> py;
+					if (cin){
+						cout << "calling perspective\n";
+						std::cout << px << " " << py << std::endl;
+						perspective(M, px, py);
+					}
+					else{
+						cerr << "invalid perspective value\n";
+						cin.clear();
+					}
 					break;
 				case 'd':		/* Done, that's all for now */
 					break;
@@ -210,20 +270,42 @@ int main(int argc, char* argv[]) {
 
 		// build the transformation matrix based on user input
 		read_input(M);
-		std::vector<Vector3D> box = ImageOperator::getBoundingBox(M, inputImage);
 
 		// Print out the final matrix
 		std::cout << "Accumulated Matrix: " << std::endl;
 		M.print();
 
-		// Inverse mapping
+		ImageOperator::AABB box = ImageOperator::getBoundingBox(M, inputImage);
 
+		int width = ceil(box.max.x - box.min.x);
+		int height = ceil(box.max.y - box.min.y);
+		outputImage = new Image();
+		outputImage->reset(width, height);
 
-		if (argc >= 3)
+		char** iter = getIter(argv, argv + argc, "-b");
+		if (iter != argv + argc)
 		{
-			outputImageName = argv[2];
-			outputImage = new Image();
-			writeOIIOImage(outputImageName, outputImage);
+			ImageOperator::bilinear(M, inputImage, outputImage);
+			currentImage = outputImage;
+
+			if (argc >= 4)
+			{
+				outputImageName = argv[3];
+				writeOIIOImage(outputImageName, outputImage);
+			}
+		}
+		else
+		{
+			// Inverse mapping
+			Matrix3D invMat = M.inverse();
+			ImageOperator::inverseMap(inputImage, outputImage, invMat);
+			currentImage = outputImage;
+
+			if (argc >= 3)
+			{
+				outputImageName = argv[2];
+				writeOIIOImage(outputImageName, outputImage);
+			}
 		}
 	}
 	else

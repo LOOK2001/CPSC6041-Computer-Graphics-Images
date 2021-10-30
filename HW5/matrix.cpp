@@ -47,7 +47,7 @@ void Matrix3D::setidentity(){
  Set the matrix m to the contents of a 3x3 array
  */
 void Matrix3D::set(const double coefs[3][3]){
-  
+
   for(int row = 0; row < 3; row++)
 	for(int col = 0; col < 3; col++)
 	  M[row][col] = coefs[row][col];
@@ -75,7 +75,7 @@ double Matrix3D::determinant()const{
 */
 Matrix3D Matrix3D::adjoint()const{
   Matrix3D adj;
-  
+
   adj.M[0][0] = (M[1][1] * M[2][2] - M[1][2] * M[2][1]);
   adj.M[0][1] = (M[0][2] * M[2][1] - M[0][1] * M[2][2]);
   adj.M[0][2] = (M[0][1] * M[1][2] - M[0][2] * M[1][1]);
@@ -85,7 +85,7 @@ Matrix3D Matrix3D::adjoint()const{
   adj.M[2][0] = (M[1][0] * M[2][1] - M[1][1] * M[2][0]);
   adj.M[2][1] = (M[0][1] * M[2][0] - M[0][0] * M[2][1]);
   adj.M[2][2] = (M[0][0] * M[1][1] - M[0][1] * M[1][0]);
-  
+
   return adj;
 }
 
@@ -94,7 +94,7 @@ Matrix3D Matrix3D::adjoint()const{
    matrix inv.
 */
 Matrix3D Matrix3D::inverse()const{
-  Matrix3D inv;  
+  Matrix3D inv;
   double det = determinant();
 
   inv.M[0][0] = (M[1][1] * M[2][2] - M[1][2] * M[2][1]) / det;
@@ -106,7 +106,7 @@ Matrix3D Matrix3D::inverse()const{
   inv.M[2][0] = (M[1][0] * M[2][1] - M[1][1] * M[2][0]) / det;
   inv.M[2][1] = (M[0][1] * M[2][0] - M[0][0] * M[2][1]) / det;
   inv.M[2][2] = (M[0][0] * M[1][1] - M[0][1] * M[1][0]) / det;
-  
+
   return inv;
 }
 
@@ -117,11 +117,11 @@ Matrix3D Matrix3D::inverse()const{
 */
 Vector3D Matrix3D::operator*(const Vector2D &v)const{
   Vector3D vout;
-  
+
   vout.x =  M[0][0] * v.x + M[0][1] * v.y + M[0][2];
   vout.y =  M[1][0] * v.x + M[1][1] * v.y + M[1][2];
   vout.z =  M[2][0] * v.x + M[2][1] * v.y + M[2][2];
-  
+
   return vout;
 }
 
@@ -130,11 +130,11 @@ Vector3D Matrix3D::operator*(const Vector2D &v)const{
  */
 Vector3D Matrix3D::operator*(const Vector3D &v)const{
   Vector3D vout;
-  
+
   vout.x =  M[0][0] * v.x + M[0][1] * v.y + M[0][2] * v.z;
   vout.y =  M[1][0] * v.x + M[1][1] * v.y + M[1][2] * v.z;
   vout.z =  M[2][0] * v.x + M[2][1] * v.y + M[2][2] * v.z;
-  
+
   return vout;
 }
 
@@ -146,7 +146,7 @@ Matrix3D Matrix3D::operator*(const Matrix3D &m2)const{
   double sum;
   int row, col, rc;
   Matrix3D prod;	/* make internal copy in case m3 is m1 or m2 */
-  
+
   for(row = 0; row < 3; row++)
     for(col = 0; col < 3; col++){
       sum = 0.0;
@@ -154,7 +154,7 @@ Matrix3D Matrix3D::operator*(const Matrix3D &m2)const{
 		sum += M[row][rc] * m2.M[rc][col];
       prod.M[row][col] = sum;
     }
-  
+
   return prod;
 }
 
@@ -199,9 +199,9 @@ void invbilinear(const BilinearCoeffs &c, Vector2D xy, Vector2D &uv){
     c0 = c.a1 * (c.b0 - xy.y) + c.b1 * (xy.x - c.a0);
     c1 = c.a3 * (c.b0 - xy.y) + c.b3 * (xy.x - c.a0) +
       c.a1 * c.b2 - c.a2 * c.b1;
-    
+
     discriminant = sqrt(c1 * c1 - 4.0 * c.c2 * c0);
-    
+
     uv.y =(-c1 + discriminant) / (2.0 * c.c2);
     if(uv.y < 0.0 || uv.y > 1.0){
       uv.y =(-c1 - discriminant) / (2.0 * c.c2);

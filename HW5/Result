@@ -1,0 +1,5 @@
+1. perspective warp 0.002 0.006
+2. rotation 30
+3. flip 1 1
+4. rotation 50, perspective warp 0.002 0.002
+5. shear 1.2 0

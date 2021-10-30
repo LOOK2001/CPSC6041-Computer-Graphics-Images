@@ -24,6 +24,11 @@ typedef vector<vector<double>> Kernel;
 
 namespace ImageOperator{
 
+struct AABB{
+    Vector2D min;
+    Vector2D max;
+};
+
 void flipVertical(Image* img);
 void flipHorizontal(Image* img);
 
@@ -57,9 +62,13 @@ Kernel createGaborFilter(double sigma, bool isAdvanced=false, double theta=0.0, 
 void flipKernel(Kernel& kernel);
 
 //
-std::vector<Vector3D> getBoundingBox(Matrix3D &M, Image *img);
+AABB getBoundingBox(Matrix3D &M, Image *img);
 
-void inverseMap(Image *in, Image *out);
+void inverseMap(Image *in, Image *out, const Matrix3D& invMat);
+
+void bilinear(const Matrix3D& M, Image *in, Image *out);
+
+void inverseTwirl(Image *in, Image*out, Vector2D center, const double strength);
 }
 
 #endif // IMAGE_OPERATOR_H

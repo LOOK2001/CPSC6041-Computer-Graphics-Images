@@ -17,10 +17,10 @@ void Rotate(Matrix3D &M, float theta){
     double rad = PI * theta / 180.0; // convert degrees to radians
 
     // populate the rotation matrix
-    R[0][0] = cos(theta);
-    R[0][1] = -sin(theta);
-    R[1][0] = sin(theta);
-    R[1][1] = cos(theta);
+    R[0][0] = cos(rad);
+    R[0][1] = -sin(rad);
+    R[1][0] = sin(rad);
+    R[1][1] = cos(rad);
 
     // append the rotation to transformation Matrix
     M = R * M;
@@ -44,8 +44,8 @@ Multiply M by a translation matrix of value dx, dy
 void translate(Matrix3D &M, float dx, float dy)
 {
     Matrix3D R;
-    R[0][0] = dx;
-    R[1][1] = dy;
+    R[0][2] = dx;
+    R[1][2] = dy;
 
     M = R * M;
 }
