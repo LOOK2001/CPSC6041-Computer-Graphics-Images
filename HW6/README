@@ -1,0 +1,23 @@
+Xicheng Wang
+xichenw@clemson.edu
+
+The program can warp can warp an input image with matrix input into the new shape and write out the image to a file.
+
+To compile: make
+Usage: ./warp input_image_file [-b] [output_image_file]
+
+matrix command:
+r theta	counter clockwise rotation about image origin, theta in degree
+s sx sy	scale
+t dx dy	translate
+h hx hy	shear
+f fx fy	flip: if fx = 1 flip horizontally, fy = 1 flip vertically
+p px py	perspective warp
+d		done
+
+keyboard controls:
+n cx cy s	twirl
+
+The examples of warped images are showen in the Result.pdf
+The program will run with the projective warp as a default method.
+If you want to use twirl warp, you need to press d to display the image first.
