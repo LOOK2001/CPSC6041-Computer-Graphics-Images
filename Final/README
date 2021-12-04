@@ -1,0 +1,16 @@
+Xicheng Wang
+xichenw@clemson.edu
+
+The program is to fix the minification and aliasing artifacts introduced by nonlinear warps
+
+To compile: make
+Usage: ./cleanWarper ./west.jpeg
+
+
+keyboard controls:
+Press r or R apply anti-aliasing filter
+Press k or K apply both anti-aliasing and adaptive supersampling
+Press q or Q exit the program
+
+The examples of clean warp are showen in the Result.pdf
+The program will run inv_map2 as a default method.
