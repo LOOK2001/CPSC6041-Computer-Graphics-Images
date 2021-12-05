@@ -65,7 +65,7 @@ void displayMipmaps()
 	glFlush();
 }
 
-void handleReshapeMipmap()
+void handleReshapeMipmap(int w, int h)
 {
 	if (!mipmaps)
 	return;
@@ -229,7 +229,7 @@ void zoomout()
 	// load the mipmap using the selected level
 	ImageOperator::readMipmaps(mipmaps, outputImage, current_level);
 	ImageOperator::flipHorizontal(outputImage);
-	
+
 	// refresh the window
 	glutReshapeWindow(window_width, window_height);
 	glutPostRedisplay();
@@ -336,10 +336,11 @@ int main(int argc, char* argv[]) {
 	// create a window for mipmaps
 	glutInitWindowSize(WIDTH, HEIGHT);
 	glutCreateWindow("Mipmaps");
-	glutDisplayFunc(displayRepaired); 		 // display callback
-	glutReshapeFunc(handleReshape);			 // window resize callback
+	glutDisplayFunc(displayMipmaps); 		 // display callback
+	glutReshapeFunc(handleReshapeMipmap);			 // window resize callback
 
 	glutMainLoop();
+
 
 	if (inputImage)
 		delete inputImage;
