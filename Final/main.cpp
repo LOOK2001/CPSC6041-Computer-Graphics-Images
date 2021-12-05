@@ -37,10 +37,10 @@ OIIO_NAMESPACE_USING
 Image* inputImage = nullptr;
 Image* mipmaps = nullptr;
 Image* outputImage = nullptr;
-Image* repairedImage = nullptr;
 string inputImageName;
 string outputImageName;
 Image* currentImage = nullptr;
+Kernel kernel;
 int window_width = 0;
 int window_height = 0;
 float zoom_factor = 1.0;
@@ -101,23 +101,6 @@ void display() {
 	glFlush();
 }
 
-void displayRepaired(){
-	// specify window clear (background) color to be opaque white
-	glClearColor(0, 0, 0, 1);
-
-	// clear window to background color
-	glClear(GL_COLOR_BUFFER_BIT);
-	glRasterPos2i(0, 0);
-
-	// writes a block of pixels to the framebuffer
-	if (repairedImage){
-		repairedImage->show();
-	}
-
-	// flush the OpenGL pipeline to the viewport
-	glFlush();
-}
-
 void handleReshape(int w, int h) {
 	window_width = w;
 	window_height = h;
@@ -156,36 +139,6 @@ void handleKey(unsigned char key, int x, int y) {
 		exit(0);
 		break;
 
-	case 'r':
-	case 'R':{
-		std::cout << "the repaired image displayed " << std::endl;
-		// second window display the ouput image
-		glutInitWindowSize(WIDTH, HEIGHT);
-		glutCreateWindow("Info");
-		// supersmapling
-		ImageOperator::antialising(inputImage, repairedImage, 0);
-		glutDisplayFunc(displayRepaired); 		 // display callback
-		glutReshapeFunc(handleReshape);			 // window resize callback
-		break;
-	}
-
-	case 'k':
-	case 'K':{
-		std::cout << "the repaired image displayed " << std::endl;
-
-		ImageOperator::okwarp(inputImage, outputImage, 1);
-		currentImage = outputImage;
-
-		// second window display the ouput image
-		glutInitWindowSize(WIDTH, HEIGHT);
-		glutCreateWindow("Advanced Extension");
-		// supersmapling
-		ImageOperator::antialising(outputImage, repairedImage, 1);
-		glutDisplayFunc(displayRepaired); 		 // display callback
-		glutReshapeFunc(handleReshape);			 // window resize callback
-		break;
-	}
-
 	case 'w':
 	case 'W':{
 		string outfilename;
@@ -200,44 +153,67 @@ void handleKey(unsigned char key, int x, int y) {
 	}
 }
 
+void zoomin()
+{
+	zoom_factor += 0.01;
+
+	current_level = (int)(1 / zoom_factor) - 1;
+	current_level = min(mipmaps_level, max(0, current_level));
+	std::cout << "current level: " << current_level << std::endl;
+
+	ImageOperator::readMipmaps(mipmaps, outputImage, current_level);
+	ImageOperator::flipHorizontal(outputImage);
+	//currentImage = outputImage;
+
+	glutReshapeWindow(window_width, window_height);
+	glutPostRedisplay();
+}
+
+void zoomout()
+{
+	zoom_factor -= 0.01;
+
+	current_level = (int)(1 / zoom_factor) - 1;
+	current_level = min(mipmaps_level, max(0, current_level));
+	std::cout << "current level: " << current_level << std::endl;
+
+	ImageOperator::readMipmaps(mipmaps, outputImage, current_level);
+	ImageOperator::flipHorizontal(outputImage);
+	//currentImage = outputImage;
+
+	glutReshapeWindow(window_width, window_height);
+	glutPostRedisplay();
+}
+
+void mouseClick(int button, int state, int x, int y)
+{
+	if (state  == GLUT_DOWN)
+	{
+		switch(button)
+		{
+			// mouse wheel scrolls
+			case 3:
+			zoomin();
+			break;
+			case 4:
+			zoomout();
+			break;
+		}
+	}
+}
+
 void handleSpecialKeypress(int key, int x, int y)
 {
 	// user can cycle between images by arrow keys
 	switch (key) {
 		case GLUT_KEY_UP:
 		{
-			zoom_factor += 0.1;
-
-			int level = 0;
-			current_level = mipmaps_level - (int)(zoom_factor * mipmaps_level);
-			if (zoom_factor > 0 && zoom_factor < 0.5)
-				current_level = 1
-			std::cout << current_level << std::endl;
-			ImageOperator::readMipmaps(mipmaps, outputImage, current_level);
-			//currentImage = outputImage;
-
-			glutReshapeWindow(window_width, window_height);
-			glutPostRedisplay();
-			std::cout << zoom_factor << std::endl;
+			zoomin();
 			break;
 		}
 		case GLUT_KEY_DOWN:
 		{
-			zoom_factor -= 0.1;
-			if (zoom_factor <= 0)
-				return;
-			//std::cout << zoom
-
-			int level = 0;
-
-			current_level = mipmaps_level - (int)(zoom_factor * mipmaps_level);
-			std::cout << current_level << std::endl;
-			ImageOperator::readMipmaps(mipmaps, outputImage, current_level);
-			//currentImage = outputImage;
-
-			glutReshapeWindow(window_width, window_height);
-			glutPostRedisplay();
-			std::cout << zoom_factor << std::endl;
+			zoomout();
 			break;
 		}
 		defalut:
@@ -268,15 +244,19 @@ int main(int argc, char* argv[]) {
 	outputImage = new Image();
 	outputImage->reset(width * 1.5, height);
 
+	// load filterImage
+	kernel = ImageOperator::createGaussianFilter(2);
+
 	// create mipmaps
 	mipmaps = new Image();
 	mipmaps->reset(width * 1.5, height);
-	ImageOperator::buildMipmaps(inputImage, mipmaps, mipmaps_level);
-	writeOIIOImage("123mipmaps.png", mipmaps);
+	ImageOperator::buildMipmaps(inputImage, mipmaps, mipmaps_level, kernel);
+	writeOIIOImage("mipmaps.png", mipmaps);
 	std::cout << "mipmaps level: " << mipmaps_level << std::endl;
 
-	int level = 1;
+	int level = 0;
 	ImageOperator::readMipmaps(mipmaps, outputImage, level);
+	ImageOperator::flipHorizontal(outputImage);
 	currentImage = outputImage;
 
 	outputImageName = "mipmaps.png";
@@ -295,8 +275,9 @@ int main(int argc, char* argv[]) {
 
 	// set up the callback routines to be called when glutMainLoop() detects
 	// an event
-	glutDisplayFunc(display); 		 // display callback
+	glutDisplayFunc(display); 		 		 // display callback
 	glutKeyboardFunc(handleKey);			 // keyboard callback
+	glutMouseFunc(mouseClick);			 // mouse callback
 	glutSpecialFunc(handleSpecialKeypress);  // keyboard callback
 	glutReshapeFunc(handleReshape);			 // window resize callback
 

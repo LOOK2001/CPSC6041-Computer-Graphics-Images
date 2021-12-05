@@ -74,7 +74,9 @@ void okwarp(Image* in, Image* out, int mode = 0);
 void antialising (Image* in, Image* out, int mode = 0);
 
 void scaleImage(Image* in, Image* out, int factor, bool up);
-void buildMipmaps(Image* in, Image *out, int& mipmaps_level);
+void mirrorImage(Image* in);
+Kernel createGaussianFilter(int sigma);
+void buildMipmaps(Image* in, Image *out, int& mipmaps_level, const Kernel& kernel);
 void readMipmaps(Image* mipmaps, Image* out, int level);
 }
 

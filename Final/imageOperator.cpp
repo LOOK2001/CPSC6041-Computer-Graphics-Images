@@ -730,6 +730,58 @@ void ImageOperator::antialising (Image* in, Image* out, int mode)
     }
 }
 
+Kernel ImageOperator::createGaussianFilter(int sigma)
+{
+    int kernel_center;
+    int kernel_size;
+    Kernel filter;
+    kernel_size = 4 * sigma + 1;
+    kernel_center = 2 * sigma;
+
+    filter.resize(kernel_size);
+    for ( int i = 0; i < kernel_size; i++)
+        filter[i].resize(kernel_size);
+
+    std::cout << "Kernel size: " << kernel_size << std::endl;
+    double positive_sum = 0.0;
+    double negative_sum = 0.0;
+
+    for (int row = 0; row < kernel_size; row++)
+    {
+        for (int col = 0; col < kernel_size; col++)
+        {
+            double x, y, xx, yy;
+            // Distance to kernel center
+            x = (col > 0) ? (col + 0.5 - kernel_center) : (col - 0.5 - kernel_center);
+            y = (row > 0) ? (row + 0.5 - kernel_center) : (row - 0.5 - kernel_center);
+
+            xx = x * x;
+            yy = y * y;
+            filter[row][col] = exp(-(xx + yy) / (2 * sigma * sigma));
+
+            if (filter[row][col] > 0)
+                positive_sum += filter[row][col];
+            else
+                negative_sum += -filter[row][col];
+        }
+    }
+
+    double scale = max(positive_sum, negative_sum);
+    // Clamp scale value
+    scale = max(0.0, min(scale, 255.0));
+    // Normalize the kernel weights
+    for (int row = 0; row < kernel_size; row ++)
+    {
+        for (int col = 0; col < kernel_size; col++)
+        {
+            filter[row][col] =  filter[row][col] / scale;
+        }
+    }
+
+    ImageOperator::flipKernel(filter);
+    return filter;
+}
+
 void ImageOperator::scaleImage(Image* in, Image* out, int factor, bool up)
 {
     // input size
@@ -756,7 +808,7 @@ void ImageOperator::scaleImage(Image* in, Image* out, int factor, bool up)
     }
 }
 
-void ImageOperator::buildMipmaps(Image* in, Image *out, int& mipmaps_level)
+void ImageOperator::buildMipmaps(Image* in, Image *out, int& mipmaps_level, const Kernel& kernel)
 {
     // input size
     int in_width = in->Width();
@@ -785,8 +837,6 @@ void ImageOperator::buildMipmaps(Image* in, Image *out, int& mipmaps_level)
     }
     level ++;
 
-    Kernel kernel;
-    readFilter("box.filt", kernel);
     Image* prev = new Image();
     prev->copy(in);
     Image* curr = new Image();
@@ -865,10 +915,6 @@ void ImageOperator::readMipmaps(Image* mipmaps, Image* out, int level)
         out_width = in_width / 3 * 2 / pow(2, level);
         out_height = in_height / pow(2, level);
     }
-    // std::cout << "start x: " << start_x << std::endl;
-    // std::cout << "start y: " << start_y << std::endl;
-    // std::cout << "out_width: " << out_width << std::endl;
-    // std::cout << "out_height " << out_height << std::endl;
 
     out->reset(out_width, out_height);
 
@@ -881,7 +927,6 @@ void ImageOperator::readMipmaps(Image* mipmaps, Image* out, int level)
             for (int k = 0; k < 4; k ++)
             {
                 out->value(i, j, k) = mipmaps->value(x2, y2, k);
-                //std::cout << "out value " << mipmaps->value(x2-1, y2-1, k) << std::endl;
             }
         }
     }
