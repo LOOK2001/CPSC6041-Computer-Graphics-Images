@@ -1,16 +1,18 @@
 Xicheng Wang
 xichenw@clemson.edu
 
-The program is to fix the minification and aliasing artifacts introduced by nonlinear warps
+This program is to generate mipmaps from an input image. And display the mipmap and the original image together in a window. Users can scale the pixmap via the mousewheel to compare the differences between them. The user would see the aliasing artifacts on the mipmap less than the original image when the user scale down the image.
+
+The program would load west.jpeg as a default
 
 To compile: make
-Usage: ./cleanWarper ./west.jpeg
+Usage: ./go [image_file_name]
 
 
 keyboard controls:
-Press r or R apply anti-aliasing filter
-Press k or K apply both anti-aliasing and adaptive supersampling
+Press up or down to zoom in and zoom out the image
+Or scroll mouse wheel to zoom in and zoom out the image
 Press q or Q exit the program
 
-The examples of clean warp are showen in the Result.pdf
-The program will run inv_map2 as a default method.
+Problems:
+I select the level of mipmap based on the zoom factor that users input. I think the level of mipmap I select does not match the size of the viewport perfectly.
