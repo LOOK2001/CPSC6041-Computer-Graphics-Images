@@ -47,17 +47,67 @@ float zoom_factor = 1.0;
 int mipmaps_level = 0;
 static int current_level = 0;
 
+void displayMipmaps()
+{
+	// specify window clear (background) color to be opaque white
+	glClearColor(0, 0, 0, 1);
+
+	// clear window to background color
+	glClear(GL_COLOR_BUFFER_BIT);
+	glRasterPos2i(0, 0);
+
+	// writes a block of pixels to the framebuffer
+	if (mipmaps){
+		mipmaps->show();
+	}
+
+	// flush the OpenGL pipeline to the viewport
+	glFlush();
+}
+
+void handleReshapeMipmap()
+{
+	if (!mipmaps)
+	return;
+
+	int xres = mipmaps->Width();
+	int yres = mipmaps->Height();
+
+	float factor = 1;
+
+	// scale down image to the largest size when user decrease the size of window
+	if (w < xres || h < yres)
+	{
+		float xfactor = w / float(xres);
+		float yfactor = h / float(yres);
+		factor = (xfactor > yfactor) ? yfactor : xfactor;
+		glPixelZoom(factor, factor);
+	}
+
+	// set the image remain centered in the window
+	glViewport((w - xres * factor) /2, (h - yres * factor) / 2, w, h);
+
+	// define the drawing coordinate system on the viewport
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(0, w, 0, h);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
 void displayImages(Image* img, int x = 0, int y = 0)
 {
+	// use scissor to make sure the images can be displayed seperately
 	glScissor(x, y, window_width / 2, window_height);
 	glEnable(GL_SCISSOR_TEST);
 
-	// // clear window to background color
+	// clear window to background color
 	glClear(GL_COLOR_BUFFER_BIT);
 	glRasterPos2i(0, 0);
 
 	int w = window_width;
 	int h = window_height;
+	// scale the pixels using zoom_factor
 	int _w = w * zoom_factor;
 	int _h = h * zoom_factor;
 
@@ -77,24 +127,16 @@ void displayImages(Image* img, int x = 0, int y = 0)
 	if (img){
 		img->show();
 	}
-
-	// glViewport(x, y, window_width / 2, window_height);
-	// // glLoadIdentity();
-	// char* string = "SIZE: ";
-	// int len = (int)strlen(string);
-	// glRasterPos2f(x + 20, window_height - 100);
-	// for (int i = 0; i < len; i++)
-	// {
-	// 	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, string[i]);
-	// }
 }
 
 void display() {
 	// specify window clear (background) color to be opaque white
 	glClearColor(0, 0, 0, 1);
 
+	// display the mipmap
 	displayImages(outputImage, 0, 0);
 
+	// display original image
 	displayImages(inputImage, window_width / 2, 0);
 
 	// flush the OpenGL pipeline to the viewport
@@ -153,34 +195,42 @@ void handleKey(unsigned char key, int x, int y) {
 	}
 }
 
+// zoom in
 void zoomin()
 {
+	// zoom factor to scale the size of pixels
 	zoom_factor += 0.01;
 
+	// select mipmap level
 	current_level = (int)(1 / zoom_factor) - 1;
 	current_level = min(mipmaps_level, max(0, current_level));
 	std::cout << "current level: " << current_level << std::endl;
 
+	// load the mipmap using the selected level
 	ImageOperator::readMipmaps(mipmaps, outputImage, current_level);
 	ImageOperator::flipHorizontal(outputImage);
-	//currentImage = outputImage;
 
+	// refresh the window
 	glutReshapeWindow(window_width, window_height);
 	glutPostRedisplay();
 }
 
+// zoom out
 void zoomout()
 {
+	// zoom factor to scale the size of pixels
 	zoom_factor -= 0.01;
 
+	// select mipmap level
 	current_level = (int)(1 / zoom_factor) - 1;
 	current_level = min(mipmaps_level, max(0, current_level));
 	std::cout << "current level: " << current_level << std::endl;
 
+	// load the mipmap using the selected level
 	ImageOperator::readMipmaps(mipmaps, outputImage, current_level);
 	ImageOperator::flipHorizontal(outputImage);
-	//currentImage = outputImage;
-
+	
+	// refresh the window
 	glutReshapeWindow(window_width, window_height);
 	glutPostRedisplay();
 }
@@ -193,11 +243,11 @@ void mouseClick(int button, int state, int x, int y)
 		{
 			// mouse wheel scrolls
 			case 3:
-			zoomin();
-			break;
+				zoomin();
+				break;
 			case 4:
-			zoomout();
-			break;
+				zoomout();
+				break;
 		}
 	}
 }
@@ -240,22 +290,25 @@ int main(int argc, char* argv[]) {
 	int width = inputImage->Width();
 	int height = inputImage->Height();
 
-	// create warped image instance
+	// create output image
 	outputImage = new Image();
 	outputImage->reset(width * 1.5, height);
 
-	// load filterImage
+	// load filter
 	kernel = ImageOperator::createGaussianFilter(2);
 
 	// create mipmaps
 	mipmaps = new Image();
 	mipmaps->reset(width * 1.5, height);
-	ImageOperator::buildMipmaps(inputImage, mipmaps, mipmaps_level, kernel);
+	ImageOperator::generateMipmaps(inputImage, mipmaps, mipmaps_level, kernel);
+	// write the mipmaps to a file
 	writeOIIOImage("mipmaps.png", mipmaps);
 	std::cout << "mipmaps level: " << mipmaps_level << std::endl;
 
+	// read a specific level of mipmap
 	int level = 0;
 	ImageOperator::readMipmaps(mipmaps, outputImage, level);
+	// mirror, for better comparision
 	ImageOperator::flipHorizontal(outputImage);
 	currentImage = outputImage;
 
@@ -264,7 +317,6 @@ int main(int argc, char* argv[]) {
 	{
 		outputImageName = argv[2];
 	}
-	//writeOIIOImage(outputImageName, outputImage);
 
 	glutInit(&argc, argv);
 
@@ -279,6 +331,12 @@ int main(int argc, char* argv[]) {
 	glutKeyboardFunc(handleKey);			 // keyboard callback
 	glutMouseFunc(mouseClick);			 // mouse callback
 	glutSpecialFunc(handleSpecialKeypress);  // keyboard callback
+	glutReshapeFunc(handleReshape);			 // window resize callback
+
+	// create a window for mipmaps
+	glutInitWindowSize(WIDTH, HEIGHT);
+	glutCreateWindow("Mipmaps");
+	glutDisplayFunc(displayRepaired); 		 // display callback
 	glutReshapeFunc(handleReshape);			 // window resize callback
 
 	glutMainLoop();
